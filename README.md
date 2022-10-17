@@ -84,7 +84,7 @@ The application that we will be making will include authentication and authorisa
 
 ### Client-side routing
 1. What is client-side routing (CSR)?
-2. Setting up CSR with React router DOM
+2. Installing React router DOM
 3. Setting up views for our routes
 
 ### Setting up our server
