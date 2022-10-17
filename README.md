@@ -50,17 +50,24 @@ The application that we will be making will include authentication and authorisa
 3. What you will learn
 
 ### Setting up your machine
-3. Installing Visual Studio Code
-4. Installing Node and NPM
+1. Installing Visual Studio Code
+2. Installing Node and NPM
 
 ### Getting to know ReactJs
-4. What is React?
-5. Why React? (React vs Vue vs Angular)
-6. Installing React
-7. React fundamentals (theory)
-8. JSX and functional components
-9. The `useState` hook
-10. Sharing states between sibling components
+1. What is React?
+2. Why React? (React vs Vue vs Angular)
+3. Installing React
+4. React fundamentals (theory)
+5. JSX and functional components
+6. The `useState` hook
+7. Sharing states between sibling components
+
+### Version control, Github and Prettier
+1. What is version control and Git?
+2. Setting up a Github account
+3. Setting up a repository in Github
+4. Setting up our project for Git
+5. Setting up Prettier
 
 ### Coding with Typescript
 1. What is Typescript?
@@ -74,13 +81,6 @@ The application that we will be making will include authentication and authorisa
 4. Why MaterialUI (MUI)?
 5. Installing MUI
 6. Testing MUI (by creating a `NewGroceryListForm` component)
-
-### Version control, Github and Prettier
-1. What is version control and Git?
-2. Setting up a Github account
-3. Setting up a repository in Github
-4. Setting up our project for Git
-5. Setting up Prettier
 
 ### Client-side routing
 1. What is client-side routing (CSR)?
