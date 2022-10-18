@@ -49,6 +49,18 @@ app.put('/api/v1/shopping-lists/:id', (req, res) => {
 	res.status(200).json(updatedList);
 });
 
+app.delete('/api/v1/shopping-lists/:id', (req, res) => {
+	const { id } = req.params;
+	const shoppingList = MockShoppingLists.find((list) => list.id === id);
+	if (!shoppingList) {
+		res.status(404).json('Shopping list does not exist.');
+		return;
+	}
+	const indexOfList = MockShoppingLists.indexOf(shoppingList);
+	MockShoppingLists.splice(indexOfList, 1);
+	res.status(200).json(shoppingList);
+});
+
 app.listen(PORT, () => {
 	console.log(`Server is running on port ${PORT}...`);
 });
