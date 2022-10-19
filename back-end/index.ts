@@ -1,64 +1,89 @@
 import express from 'express';
+import { MongoClient, ObjectId } from 'mongodb';
 const PORT = process.env.PORT || 3001;
 const app = express();
 
-const MockShoppingLists = [
-	{
-		id: '1',
-		name: 'Grocery',
-	},
-	{
-		id: '2',
-		name: 'Pharmacy',
-	},
-];
-
 app.use(express.json());
 
-app.get('/api/v1/shopping-lists', (req, res) => {
-	res.status(200).json(MockShoppingLists);
+const ShoppingListCollection = 'shopping-lists';
+
+const connectToMongo = async () => {
+	try {
+		const DatabaseName = 'shopping-list-app';
+		const ConnectionString = 'mongodb://localhost:27017';
+		const client = new MongoClient(ConnectionString);
+		await client.connect();
+		return client.db(DatabaseName);
+	} catch (error) {
+		console.error({
+			message: 'Cannot create Mongo client',
+			description: (error as Error).message,
+		});
+		throw error;
+	}
+};
+
+app.get('/api/v1/shopping-lists', async (req, res) => {
+	const db = await connectToMongo();
+	const collection = db.collection(ShoppingListCollection);
+	const cursor = await collection.find();
+	const shoppingLists = await cursor.toArray();
+	res.status(200).json(
+		shoppingLists.map(({ _id, ...rest }) => {
+			return { ...rest, id: _id.toString() };
+		})
+	);
 });
 
-app.get('/api/v1/shopping-lists/:id', (req, res) => {
+app.get('/api/v1/shopping-lists/:id', async (req, res) => {
 	const { id } = req.params;
-	const shoppingList = MockShoppingLists.filter((list) => {
-		return list.id === id;
-	});
-	res.status(200).json(shoppingList);
-});
-
-app.post('/api/v1/shopping-lists', (req, res) => {
-	const { name } = req.body;
-	const nextId = MockShoppingLists.length + 1;
-	const newList = { id: nextId.toString(), name };
-	MockShoppingLists.push(newList);
-	res.status(201).json(newList);
-});
-
-app.put('/api/v1/shopping-lists/:id', (req, res) => {
-	const { name } = req.body;
-	const { id } = req.params;
-	const shoppingList = MockShoppingLists.find((list) => list.id === id);
-	if (!shoppingList) {
+	const db = await connectToMongo();
+	const collection = db.collection(ShoppingListCollection);
+	const result = await collection.findOne({ _id: new ObjectId(id) });
+	if (!result) {
 		res.status(404).json('Shopping list does not exist.');
 		return;
 	}
-	const indexOfList = MockShoppingLists.indexOf(shoppingList);
-	const updatedList = { ...shoppingList, name };
-	MockShoppingLists[indexOfList] = updatedList;
-	res.status(200).json(updatedList);
+	const { _id, ...rest } = result;
+	res.status(200).json({ id: _id.toString(), ...rest });
 });
 
-app.delete('/api/v1/shopping-lists/:id', (req, res) => {
+app.post('/api/v1/shopping-lists', async (req, res) => {
+	const { name } = req.body;
+	const db = await connectToMongo();
+	const collection = db.collection(ShoppingListCollection);
+	const doc = await collection.insertOne({ name });
+	res.status(201).json({ name, id: doc.insertedId });
+});
+
+app.put('/api/v1/shopping-lists/:id', async (req, res) => {
+	const { name } = req.body;
 	const { id } = req.params;
-	const shoppingList = MockShoppingLists.find((list) => list.id === id);
-	if (!shoppingList) {
+	const db = await connectToMongo();
+	const collection = db.collection(ShoppingListCollection);
+	const result = await collection.findOneAndUpdate(
+		{ _id: new ObjectId(id) },
+		{ $set: { name } }
+	);
+	if (!result.value) {
 		res.status(404).json('Shopping list does not exist.');
 		return;
 	}
-	const indexOfList = MockShoppingLists.indexOf(shoppingList);
-	MockShoppingLists.splice(indexOfList, 1);
-	res.status(200).json(shoppingList);
+	const { _id, ...rest } = result.value;
+	res.status(200).json({ id: _id.toString(), ...rest });
+});
+
+app.delete('/api/v1/shopping-lists/:id', async (req, res) => {
+	const { id } = req.params;
+	const db = await connectToMongo();
+	const collection = db.collection(ShoppingListCollection);
+	const result = await collection.findOneAndDelete({ _id: new ObjectId(id) });
+	if (!result.value) {
+		res.status(404).json('Shopping list does not exist.');
+		return;
+	}
+	const { _id, ...rest } = result.value;
+	res.status(200).json({ id: _id.toString(), ...rest });
 });
 
 app.listen(PORT, () => {
