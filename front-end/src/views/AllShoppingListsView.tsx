@@ -1,10 +1,9 @@
 import { Container, Typography, Stack, Box } from '@mui/material';
 import { NewGroceryListForm } from '../forms/NewGroceryListForm';
 import axios from 'axios';
-import { useEffect } from 'react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
-interface ShoppingList {
+export interface ShoppingList {
 	name: string;
 	id: string;
 }
