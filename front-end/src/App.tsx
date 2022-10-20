@@ -9,7 +9,7 @@ const App = () => {
 		<BrowserRouter>
 			<Routes>
 				<Route path="/" element={<HomeView />} />
-				<Route path="/shopping-list">
+				<Route path="/shopping-lists">
 					<Route index element={<AllShoppingListsView />} />
 					<Route path=":id" element={<ShoppingListView />} />
 				</Route>
