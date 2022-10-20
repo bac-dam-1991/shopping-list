@@ -18,3 +18,10 @@ export const getShoppingListByIdApi = async (
 	const response = await Client.get<ShoppingList>(`${ShoppingLists}/${id}`);
 	return response.data;
 };
+
+export const addNewShoppingListApi = async (payload: {
+	name: string;
+}): Promise<ShoppingList> => {
+	const response = await Client.post<ShoppingList>(`${ShoppingLists}`, payload);
+	return response.data;
+};
