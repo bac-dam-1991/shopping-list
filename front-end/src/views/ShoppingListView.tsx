@@ -1,8 +1,7 @@
 import { Container, Typography } from '@mui/material';
 import { useParams } from 'react-router-dom';
 import { useEffect, useState } from 'react';
-import { ShoppingList } from './AllShoppingListsView';
-import { Client } from '../apis';
+import { getShoppingListByIdApi, ShoppingList } from '../apis/shopping-lists';
 
 export const ShoppingListView = () => {
 	const { id } = useParams();
@@ -10,11 +9,14 @@ export const ShoppingListView = () => {
 	const [shoppingList, setShoppingList] = useState<ShoppingList | null>(null);
 
 	useEffect(() => {
-		const getAllShoppingLists = async () => {
-			const response = await Client.get(`shopping-lists/${id}`);
-			setShoppingList(response.data);
+		const getShoppingListById = async () => {
+			if (!id) {
+				return;
+			}
+			const data = await getShoppingListByIdApi(id);
+			setShoppingList(data);
 		};
-		getAllShoppingLists();
+		getShoppingListById();
 	}, [id]);
 
 	return (
