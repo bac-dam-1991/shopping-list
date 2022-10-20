@@ -2,7 +2,7 @@ import { Container, Typography } from '@mui/material';
 import { useParams } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { ShoppingList } from './AllShoppingListsView';
-import axios from 'axios';
+import { Client } from '../apis';
 
 export const ShoppingListView = () => {
 	const { id } = useParams();
@@ -11,9 +11,7 @@ export const ShoppingListView = () => {
 
 	useEffect(() => {
 		const getAllShoppingLists = async () => {
-			const response = await axios.get(
-				`http://localhost:3001/api/v1/shopping-lists/${id}`
-			);
+			const response = await Client.get(`shopping-lists/${id}`);
 			setShoppingList(response.data);
 		};
 		getAllShoppingLists();

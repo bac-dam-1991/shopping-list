@@ -1,7 +1,7 @@
 import { Container, Typography, Stack, Box } from '@mui/material';
 import { NewGroceryListForm } from '../forms/NewGroceryListForm';
-import axios from 'axios';
 import { useEffect, useState } from 'react';
+import { Client } from '../apis';
 
 export interface ShoppingList {
 	name: string;
@@ -13,9 +13,7 @@ export const AllShoppingListsView = () => {
 
 	useEffect(() => {
 		const getAllShoppingLists = async () => {
-			const response = await axios.get(
-				'http://localhost:3001/api/v1/shopping-lists'
-			);
+			const response = await Client.get('shopping-lists');
 			setShoppingLists(response.data);
 		};
 		getAllShoppingLists();
