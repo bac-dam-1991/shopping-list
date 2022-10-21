@@ -32,3 +32,14 @@ export const deleteShoppingListApi = async (
 	const response = await Client.delete<ShoppingList>(`${ShoppingLists}/${id}`);
 	return response.data;
 };
+
+export const updateShoppingListApi = async (
+	id: string,
+	payload: { name: string }
+): Promise<ShoppingList> => {
+	const response = await Client.put<ShoppingList>(
+		`${ShoppingLists}/${id}`,
+		payload
+	);
+	return response.data;
+};
