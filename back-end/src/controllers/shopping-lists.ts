@@ -1,6 +1,7 @@
 import express from 'express';
 import { MongoClient, ObjectId } from 'mongodb';
 import { ResourceDoesNotExistError } from '../custom-errors/ResourceDoesNotExistError';
+import { UpdateError } from '../custom-errors/UpdateError';
 const router = express.Router();
 
 const ShoppingListCollection = 'shopping-lists';
@@ -96,6 +97,33 @@ router.delete('/:id', async (req, res, next) => {
 		}
 		const { _id, ...rest } = result.value;
 		res.status(200).json({ id: _id.toString(), ...rest });
+	} catch (error) {
+		next(error);
+	}
+});
+
+router.post('/:id/items/add', async (req, res, next) => {
+	try {
+		const { id } = req.params;
+		const { name, status, quantity, unit } = req.body;
+		const itemId = new ObjectId().toString();
+		const newItem = { id: itemId, name, status, quantity, unit };
+		const db = await connectToMongo();
+		const collection = db.collection(ShoppingListCollection);
+		const result = await collection.updateOne(
+			{
+				_id: new ObjectId(id),
+			},
+			{
+				$push: {
+					items: newItem,
+				},
+			}
+		);
+		if (!result.modifiedCount) {
+			throw new UpdateError('Unable to add item to shopping list');
+		}
+		res.status(201).json(newItem);
 	} catch (error) {
 		next(error);
 	}
