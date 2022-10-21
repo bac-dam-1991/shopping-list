@@ -25,3 +25,10 @@ export const addNewShoppingListApi = async (payload: {
 	const response = await Client.post<ShoppingList>(`${ShoppingLists}`, payload);
 	return response.data;
 };
+
+export const deleteShoppingListApi = async (
+	id: string
+): Promise<ShoppingList> => {
+	const response = await Client.delete<ShoppingList>(`${ShoppingLists}/${id}`);
+	return response.data;
+};

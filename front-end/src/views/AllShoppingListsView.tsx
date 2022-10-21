@@ -1,7 +1,12 @@
-import { Container, Typography, Stack, Box } from '@mui/material';
+import { Container, Typography, Stack, Paper, IconButton } from '@mui/material';
 import { NewShoppingListForm } from '../forms/NewShoppingListForm';
 import { useEffect, useState, useCallback } from 'react';
-import { getAllShoppingListsApi, ShoppingList } from '../apis/shopping-lists';
+import {
+	deleteShoppingListApi,
+	getAllShoppingListsApi,
+	ShoppingList,
+} from '../apis/shopping-lists';
+import DeleteForeverRoundedIcon from '@mui/icons-material/DeleteForeverRounded';
 
 export const AllShoppingListsView = () => {
 	const [shoppingLists, setShoppingLists] = useState<ShoppingList[]>([]);
@@ -10,6 +15,11 @@ export const AllShoppingListsView = () => {
 		const data = await getAllShoppingListsApi();
 		setShoppingLists(data);
 	}, []);
+
+	const deleteShoppingList = async (id: string) => {
+		await deleteShoppingListApi(id);
+		await getAllShoppingLists();
+	};
 
 	useEffect(() => {
 		getAllShoppingLists();
@@ -22,9 +32,18 @@ export const AllShoppingListsView = () => {
 				<NewShoppingListForm refetch={getAllShoppingLists} />
 				{shoppingLists.map((list) => {
 					return (
-						<Box key={list.id}>
-							<Typography variant="body1">{list.name}</Typography>
-						</Box>
+						<Paper key={list.id} sx={{ p: 2 }}>
+							<Stack
+								direction="row"
+								alignItems={'center'}
+								justifyContent="space-between"
+							>
+								<Typography variant="body1">{list.name}</Typography>
+								<IconButton onClick={() => deleteShoppingList(list.id)}>
+									<DeleteForeverRoundedIcon color="error" />
+								</IconButton>
+							</Stack>
+						</Paper>
 					);
 				})}
 			</Stack>
