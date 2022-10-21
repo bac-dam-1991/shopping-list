@@ -129,4 +129,58 @@ router.post('/:id/items/add', async (req, res, next) => {
 	}
 });
 
+router.put('/:id/items/:itemId/delete', async (req, res, next) => {
+	try {
+		const { id, itemId } = req.params;
+		const db = await connectToMongo();
+		const collection = db.collection(ShoppingListCollection);
+		const pipeline = [
+			{
+				$match: {
+					_id: new ObjectId(id),
+				},
+			},
+			{
+				$unwind: {
+					path: '$items',
+					preserveNullAndEmptyArrays: false,
+				},
+			},
+			{
+				$replaceRoot: {
+					newRoot: '$items',
+				},
+			},
+			{
+				$match: {
+					id: itemId,
+				},
+			},
+		];
+
+		const cursor = await collection.aggregate(pipeline);
+		const docs = await cursor.toArray();
+		if (!docs.length) {
+			throw new UpdateError('Item does not exist in shopping list');
+		}
+		const itemToRemove = docs[0];
+		const result = await collection.updateOne(
+			{
+				_id: new ObjectId(id),
+			},
+			{
+				$pull: {
+					items: itemToRemove,
+				},
+			}
+		);
+		if (!result.modifiedCount) {
+			throw new UpdateError('Unable to add item to shopping list');
+		}
+		res.status(201).json(itemId);
+	} catch (error) {
+		next(error);
+	}
+});
+
 export default router;
