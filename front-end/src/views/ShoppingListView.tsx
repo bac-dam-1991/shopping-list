@@ -1,7 +1,8 @@
-import { Container, Typography } from '@mui/material';
+import { Container, Stack, Typography } from '@mui/material';
 import { useParams } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { getShoppingListByIdApi, ShoppingList } from '../apis/shopping-lists';
+import { NewShoppingItemForm } from '../forms/NewShoppingItemForm';
 
 export const ShoppingListView = () => {
 	const { id } = useParams();
@@ -21,11 +22,16 @@ export const ShoppingListView = () => {
 
 	return (
 		<Container>
-			{shoppingList ? (
-				<Typography variant="h1">{shoppingList.name} List</Typography>
-			) : (
-				<Typography>Loading shopping list</Typography>
-			)}
+			<Stack spacing={2}>
+				{shoppingList ? (
+					<Typography variant="h1">{shoppingList.name} List</Typography>
+				) : (
+					<Typography>Loading shopping list</Typography>
+				)}
+				{id && (
+					<NewShoppingItemForm refetch={async () => {}} shoppingListId={id} />
+				)}
+			</Stack>
 		</Container>
 	);
 };

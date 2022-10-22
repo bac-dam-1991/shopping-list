@@ -43,3 +43,14 @@ export const updateShoppingListApi = async (
 	);
 	return response.data;
 };
+
+export const addItemToShoppingListApi = async (
+	id: string,
+	payload: { name: string; unit: string; quantity: number }
+) => {
+	const response = await Client.post(`${ShoppingLists}/${id}/items/add`, {
+		...payload,
+		status: 'New',
+	});
+	return response.data;
+};
