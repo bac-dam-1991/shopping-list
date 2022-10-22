@@ -5,6 +5,8 @@ import CancelRoundedIcon from '@mui/icons-material/CancelRounded';
 import { Typography, Stack, Paper, IconButton } from '@mui/material';
 import { ShoppingList } from '../apis/shopping-lists';
 import { useState } from 'react';
+import VisibilityIcon from '@mui/icons-material/Visibility';
+import { useNavigate } from 'react-router-dom';
 
 export interface ShoppingListCardProps {
 	data: ShoppingList;
@@ -18,6 +20,7 @@ export const ShoppingListCard = ({
 	onRefetch,
 }: ShoppingListCardProps) => {
 	const [isUpdating, setIsUpdating] = useState<boolean>(false);
+	const navigate = useNavigate();
 
 	const handleCancelUpdate = () => {
 		setIsUpdating(false);
@@ -33,8 +36,15 @@ export const ShoppingListCard = ({
 				>
 					<Typography variant="body1">{data.name}</Typography>
 					<Stack direction={'row'} spacing={2}>
-						<IconButton onClick={onDelete}>
-							<DeleteForeverRoundedIcon color="error" />
+						<IconButton
+							color="primary"
+							onClick={() => navigate(data.id)}
+							disabled={isUpdating}
+						>
+							<VisibilityIcon color="inherit" />
+						</IconButton>
+						<IconButton color="error" onClick={onDelete} disabled={isUpdating}>
+							<DeleteForeverRoundedIcon color="inherit" />
 						</IconButton>
 
 						{isUpdating ? (
