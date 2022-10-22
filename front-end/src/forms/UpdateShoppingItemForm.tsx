@@ -1,39 +1,37 @@
 import { Button, MenuItem, Stack, TextField } from '@mui/material';
 import { useState, ChangeEventHandler, FormEventHandler } from 'react';
-import { addItemToShoppingListApi } from '../apis/shopping-lists';
+import { ShoppingItem, updateShoppingItemApi } from '../apis/shopping-lists';
+import { Statuses, Units } from './NewShoppingItemForm';
 
-export const Units = [
-	'piece(s)',
-	'kilogram(s)',
-	'litre(s)',
-	'box(es)',
-	'millilitre(s)',
-	'milligram(s)',
-	'carton(s)',
-	'bottle(s)',
-];
-
-export const Statuses = ['New', 'Updated', 'Purchased'];
-
-export interface NewShoppingItemFormProps {
+export interface UpdateShoppingItemFormProps {
 	refetch: () => Promise<void>;
 	shoppingListId: string;
+	data: ShoppingItem;
+	closeForm: () => void;
 }
 
-export const NewShoppingItemForm = ({
+export const UpdateShoppingItemForm = ({
 	refetch,
 	shoppingListId,
-}: NewShoppingItemFormProps) => {
-	const [name, setName] = useState<string>('');
-	const [quantity, setQuantity] = useState<number>(0);
-	const [unit, setUnit] = useState<string>('');
+	data,
+	closeForm,
+}: UpdateShoppingItemFormProps) => {
+	const [name, setName] = useState<string>(data.name);
+	const [quantity, setQuantity] = useState<number>(data.quantity);
+	const [unit, setUnit] = useState<string>(data.unit);
+	const [status, setStatus] = useState<string>(data.status);
 
 	const submitForm: FormEventHandler = async (event) => {
 		event.preventDefault();
-		await addItemToShoppingListApi(shoppingListId, { name, unit, quantity });
+		await updateShoppingItemApi(shoppingListId, {
+			id: data.id,
+			name,
+			unit,
+			quantity,
+			status,
+		});
 		await refetch();
-		setName('');
-		setQuantity(0);
+		closeForm();
 	};
 
 	const handleNameChange: ChangeEventHandler<HTMLInputElement> = (event) => {
@@ -51,6 +49,11 @@ export const NewShoppingItemForm = ({
 	const handleUnitChange: ChangeEventHandler<HTMLInputElement> = (event) => {
 		const val = event.target.value;
 		setUnit(val);
+	};
+
+	const handleStatusChange: ChangeEventHandler<HTMLInputElement> = (event) => {
+		const val = event.target.value;
+		setStatus(val);
 	};
 
 	return (
@@ -72,8 +75,22 @@ export const NewShoppingItemForm = ({
 						);
 					})}
 				</TextField>
+				<TextField
+					select
+					label="Status"
+					value={status}
+					onChange={handleStatusChange}
+				>
+					{Statuses.sort().map((status) => {
+						return (
+							<MenuItem key={status} value={status}>
+								{status}
+							</MenuItem>
+						);
+					})}
+				</TextField>
 				<Button variant="contained" type="submit">
-					Add
+					Update
 				</Button>
 			</Stack>
 		</form>

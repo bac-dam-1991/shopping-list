@@ -44,6 +44,7 @@ export const ShoppingListView = () => {
 								key={item.id}
 								onDelete={async () => {}}
 								onRefetch={getShoppingListById}
+								shoppingListId={shoppingList.id}
 							/>
 						);
 					})}
