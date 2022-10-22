@@ -59,7 +59,7 @@ router.post('', async (req, res, next) => {
 		const { name } = req.body;
 		const db = await connectToMongo();
 		const collection = db.collection(ShoppingListCollection);
-		const doc = await collection.insertOne({ name });
+		const doc = await collection.insertOne({ name, items: [] });
 		res.status(201).json({ name, id: doc.insertedId });
 	} catch (error) {
 		next(error);

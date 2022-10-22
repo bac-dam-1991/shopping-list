@@ -1,8 +1,17 @@
 import { Client } from '.';
 
+export interface ShoppingItem {
+	id: string;
+	name: string;
+	unit: string;
+	quantity: number;
+	status: string;
+}
+
 export interface ShoppingList {
 	name: string;
 	id: string;
+	items: ShoppingItem[];
 }
 
 const ShoppingLists = 'shopping-lists';
