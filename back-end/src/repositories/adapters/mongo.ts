@@ -16,6 +16,14 @@ export const connectToMongo = async () => {
 	}
 };
 
+/**
+ * Wrapper around MongoDB's `find` function.
+ * It abstracts away the connection to MongoDB.
+ * @param {string} collectionName - The collection name
+ * @param {Filter<Document>} [filter={}] - The filter object, defaults to an empty object.
+ * @param {FindOptions<Document>} [options] - The find options
+ * @returns {Promise<T[]>} Returns the array of objects with `id` instead of `_id`. The array of objects can be empty.
+ */
 export const find = async <T extends unknown>(
 	collectionName: string,
 	filter: Filter<Document> = {},
@@ -40,6 +48,14 @@ export const find = async <T extends unknown>(
 	}
 };
 
+/**
+ * Wrapper around MongoDB's `findOne` function.
+ * It abstracts away the connection to MongoDB.
+ * @param {string} collectionName - The collection name
+ * @param {Filter<Document>} [filter={}] - The filter object, defaults to an empty object.
+ * @param {FindOptions<Document>} [options] - The find options
+ * @returns {Promise<T | null>} Returns the object (if found) with `id` instead of `_id`. If no object found matching filter, it returns `null`.
+ */
 export const findOne = async <T extends unknown>(
 	collectionName: string,
 	filter: Filter<Document> = {},
