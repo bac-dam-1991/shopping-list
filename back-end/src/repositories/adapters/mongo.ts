@@ -39,3 +39,28 @@ export const find = async <T extends unknown>(
 		throw error;
 	}
 };
+
+export const findOne = async <T extends unknown>(
+	collectionName: string,
+	filter: Filter<Document> = {},
+	options?: FindOptions<Document>
+): Promise<T | null> => {
+	try {
+		const db = await connectToMongo();
+		const collection = db.collection(collectionName);
+		const doc = await collection.findOne(filter, options);
+		if (!doc) {
+			return null;
+		}
+		const { _id, ...rest } = doc;
+		return { id: _id.toString(), ...rest } as T;
+	} catch (error) {
+		console.error({
+			message: 'Unable to findOne',
+			description: (error as Error).message,
+			filter,
+			options,
+		});
+		throw error;
+	}
+};
