@@ -1,38 +1,17 @@
 import express from 'express';
-import { MongoClient, ObjectId } from 'mongodb';
+import { ObjectId } from 'mongodb';
 import { ResourceDoesNotExistError } from '../custom-errors/ResourceDoesNotExistError';
 import { UpdateError } from '../custom-errors/UpdateError';
+import { connectToMongo } from '../repositories/adapters/mongo';
+import { findAllShoppingLists } from '../repositories/shopping-lists';
 const router = express.Router();
 
 const ShoppingListCollection = 'shopping-lists';
 
-const connectToMongo = async () => {
-	try {
-		const DatabaseName = 'shopping-list-app';
-		const ConnectionString = 'mongodb://localhost:27017';
-		const client = new MongoClient(ConnectionString);
-		await client.connect();
-		return client.db(DatabaseName);
-	} catch (error) {
-		console.error({
-			message: 'Cannot create Mongo client',
-			description: (error as Error).message,
-		});
-		throw error;
-	}
-};
-
 router.get('', async (req, res, next) => {
 	try {
-		const db = await connectToMongo();
-		const collection = db.collection(ShoppingListCollection);
-		const cursor = await collection.find();
-		const shoppingLists = await cursor.toArray();
-		res.status(200).json(
-			shoppingLists.map(({ _id, ...rest }) => {
-				return { ...rest, id: _id.toString() };
-			})
-		);
+		const shoppingLists = await findAllShoppingLists();
+		res.status(200).json(shoppingLists);
 	} catch (error) {
 		next(error);
 	}
