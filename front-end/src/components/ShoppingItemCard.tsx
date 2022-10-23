@@ -2,20 +2,18 @@ import DeleteForeverRoundedIcon from '@mui/icons-material/DeleteForeverRounded';
 import EditRoundedIcon from '@mui/icons-material/EditRounded';
 import CancelRoundedIcon from '@mui/icons-material/CancelRounded';
 import { Typography, Stack, Paper, IconButton, Chip } from '@mui/material';
-import { ShoppingItem } from '../apis/shopping-lists';
+import { removeShoppingItemApi, ShoppingItem } from '../apis/shopping-lists';
 import { useState } from 'react';
 import { UpdateShoppingItemForm } from '../forms/UpdateShoppingItemForm';
 
 export interface ShoppingItemCardProps {
 	data: ShoppingItem;
-	onDelete: () => Promise<void>;
 	onRefetch: () => Promise<void>;
 	shoppingListId: string;
 }
 
 export const ShoppingItemCard = ({
 	data,
-	onDelete,
 	onRefetch,
 	shoppingListId,
 }: ShoppingItemCardProps) => {
@@ -23,6 +21,11 @@ export const ShoppingItemCard = ({
 
 	const handleCancelUpdate = () => {
 		setIsUpdating(false);
+	};
+
+	const handleDeleteItem = async () => {
+		await removeShoppingItemApi(shoppingListId, data.id);
+		await onRefetch();
 	};
 
 	const getChipColour = () => {
@@ -49,7 +52,11 @@ export const ShoppingItemCard = ({
 
 					<Stack direction={'row'} spacing={2} alignItems="center">
 						<Chip label={data.status} color={getChipColour()} size="small" />
-						<IconButton color="error" onClick={onDelete} disabled={isUpdating}>
+						<IconButton
+							color="error"
+							onClick={handleDeleteItem}
+							disabled={isUpdating}
+						>
 							<DeleteForeverRoundedIcon color="inherit" />
 						</IconButton>
 

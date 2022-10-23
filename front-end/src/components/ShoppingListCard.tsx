@@ -3,20 +3,18 @@ import EditRoundedIcon from '@mui/icons-material/EditRounded';
 import { UpdateShoppingListForm } from '../forms/UpdateShoppingListForm';
 import CancelRoundedIcon from '@mui/icons-material/CancelRounded';
 import { Typography, Stack, Paper, IconButton } from '@mui/material';
-import { ShoppingList } from '../apis/shopping-lists';
+import { deleteShoppingListApi, ShoppingList } from '../apis/shopping-lists';
 import { useState } from 'react';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import { useNavigate } from 'react-router-dom';
 
 export interface ShoppingListCardProps {
 	data: ShoppingList;
-	onDelete: () => Promise<void>;
 	onRefetch: () => Promise<void>;
 }
 
 export const ShoppingListCard = ({
 	data,
-	onDelete,
 	onRefetch,
 }: ShoppingListCardProps) => {
 	const [isUpdating, setIsUpdating] = useState<boolean>(false);
@@ -24,6 +22,11 @@ export const ShoppingListCard = ({
 
 	const handleCancelUpdate = () => {
 		setIsUpdating(false);
+	};
+
+	const handleDeleteShoppingList = async () => {
+		await deleteShoppingListApi(data.id);
+		await onRefetch();
 	};
 
 	return (
@@ -43,7 +46,11 @@ export const ShoppingListCard = ({
 						>
 							<VisibilityIcon color="inherit" />
 						</IconButton>
-						<IconButton color="error" onClick={onDelete} disabled={isUpdating}>
+						<IconButton
+							color="error"
+							onClick={handleDeleteShoppingList}
+							disabled={isUpdating}
+						>
 							<DeleteForeverRoundedIcon color="inherit" />
 						</IconButton>
 

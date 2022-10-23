@@ -74,3 +74,10 @@ export const updateShoppingItemApi = async (
 	);
 	return response.data;
 };
+
+export const removeShoppingItemApi = async (id: string, itemId: string) => {
+	const response = await Client.put(
+		`${ShoppingLists}/${id}/items/${itemId}/delete`
+	);
+	return response.data;
+};

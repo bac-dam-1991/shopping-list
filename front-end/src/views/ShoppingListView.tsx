@@ -42,7 +42,6 @@ export const ShoppingListView = () => {
 							<ShoppingItemCard
 								data={item}
 								key={item.id}
-								onDelete={async () => {}}
 								onRefetch={getShoppingListById}
 								shoppingListId={shoppingList.id}
 							/>
