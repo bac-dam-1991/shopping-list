@@ -1,12 +1,16 @@
 const mockedFindShoppingListById = jest.fn();
+const mockedFindShoppingListByName = jest.fn();
+const mockedInsertNewShoppingList = jest.fn();
 jest.mock('../../repositories/shopping-lists', () => {
 	return {
 		findShoppingListById: mockedFindShoppingListById,
+		findShoppingListByName: mockedFindShoppingListByName,
+		insertNewShoppingList: mockedInsertNewShoppingList,
 	};
 });
 
 import { mockedError } from '../../../jest/setupTests';
-import { getShoppingListById } from '../shopping-lists';
+import { addNewShoppingList, getShoppingListById } from '../shopping-lists';
 
 describe('Shopping lists service functions', () => {
 	describe('getShoppingListById', () => {
@@ -61,6 +65,91 @@ describe('Shopping lists service functions', () => {
 			mockedFindShoppingListById.mockResolvedValueOnce(shoppingList);
 			const result = await getShoppingListById(shoppingListId);
 			expect(result).toStrictEqual(shoppingList);
+		});
+	});
+
+	describe('addNewShoppingList', () => {
+		const name = 'Groceries';
+		it('throws error from findShoppingListByName', async () => {
+			mockedFindShoppingListByName.mockRejectedValueOnce(new Error('boom'));
+			await expect(addNewShoppingList(name)).rejects.toThrowError('boom');
+		});
+		it('logs error from findShoppingListByName', async () => {
+			mockedFindShoppingListByName.mockRejectedValueOnce(new Error('boom'));
+			try {
+				await addNewShoppingList(name);
+			} catch {}
+			expect(mockedError).toHaveBeenCalledWith({
+				message: 'Unable to add new shopping list',
+				description: 'boom',
+				name,
+			});
+		});
+		it('calls findShoppingListByName with correct payload', async () => {
+			mockedFindShoppingListByName.mockRejectedValueOnce(new Error('boom'));
+			try {
+				await addNewShoppingList(name);
+			} catch {}
+			expect(mockedFindShoppingListByName).toHaveBeenCalledWith(name);
+		});
+		it('throws error from findShoppingListByName because there is a shopping list with the same name', async () => {
+			mockedFindShoppingListByName.mockResolvedValueOnce([{ name }]);
+			await expect(addNewShoppingList(name)).rejects.toThrowError(
+				'Shopping list with the same name already exists.'
+			);
+		});
+		it('logs error from findShoppingListByName because there is a shopping list with the same name', async () => {
+			mockedFindShoppingListByName.mockResolvedValueOnce([{ name }]);
+			try {
+				await addNewShoppingList(name);
+			} catch {}
+			expect(mockedError).toHaveBeenCalledWith({
+				message: 'Unable to add new shopping list',
+				description: 'Shopping list with the same name already exists.',
+				name,
+			});
+		});
+		it('throws error from insertNewShoppingList', async () => {
+			mockedFindShoppingListByName.mockResolvedValueOnce([]);
+			mockedInsertNewShoppingList.mockRejectedValueOnce(new Error('boom'));
+			await expect(addNewShoppingList(name)).rejects.toThrowError('boom');
+		});
+		it('logs error from insertNewShoppingList', async () => {
+			mockedFindShoppingListByName.mockResolvedValueOnce([]);
+			mockedInsertNewShoppingList.mockRejectedValueOnce(new Error('boom'));
+			try {
+				await addNewShoppingList(name);
+			} catch {}
+			expect(mockedError).toHaveBeenCalledWith({
+				message: 'Unable to add new shopping list',
+				description: 'boom',
+				name,
+			});
+		});
+		it('calls insertNewShoppingList with correct payload', async () => {
+			mockedFindShoppingListByName.mockResolvedValueOnce([]);
+			mockedInsertNewShoppingList.mockRejectedValueOnce(new Error('boom'));
+			try {
+				await addNewShoppingList(name);
+			} catch {}
+			expect(mockedInsertNewShoppingList).toHaveBeenCalledWith({
+				name,
+				items: [],
+			});
+		});
+		it('returns correct value', async () => {
+			mockedFindShoppingListByName.mockResolvedValueOnce([]);
+			mockedInsertNewShoppingList.mockResolvedValueOnce({
+				id: '635a72d64ab70da3b2628549',
+				name: 'Groceries',
+				items: [],
+			});
+			const result = await addNewShoppingList(name);
+			expect(result).toStrictEqual({
+				id: '635a72d64ab70da3b2628549',
+				name: 'Groceries',
+				items: [],
+			});
 		});
 	});
 });

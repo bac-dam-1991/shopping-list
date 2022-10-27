@@ -4,7 +4,10 @@ import { ResourceDoesNotExistError } from '../custom-errors/ResourceDoesNotExist
 import { UpdateError } from '../custom-errors/UpdateError';
 import { connectToMongo } from '../repositories/adapters/mongo';
 import { findAllShoppingLists } from '../repositories/shopping-lists';
-import { getShoppingListById } from '../services/shopping-lists';
+import {
+	addNewShoppingList,
+	getShoppingListById,
+} from '../services/shopping-lists';
 const router = express.Router();
 
 const ShoppingListCollection = 'shopping-lists';
@@ -31,10 +34,8 @@ router.get('/:id', async (req, res, next) => {
 router.post('', async (req, res, next) => {
 	try {
 		const { name } = req.body;
-		const db = await connectToMongo();
-		const collection = db.collection(ShoppingListCollection);
-		const doc = await collection.insertOne({ name, items: [] });
-		res.status(201).json({ name, id: doc.insertedId });
+		const shoppingList = await addNewShoppingList(name);
+		res.status(201).json(shoppingList);
 	} catch (error) {
 		next(error);
 	}
