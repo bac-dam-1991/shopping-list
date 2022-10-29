@@ -2,16 +2,19 @@ const mockedFind = jest.fn();
 const mockedFindOne = jest.fn();
 const mockedInsertOne = jest.fn();
 const mockedFindOneAndUpdate = jest.fn();
+const mockedFindOneAndDelete = jest.fn();
 jest.mock('../adapters/mongo', () => {
 	return {
 		find: mockedFind,
 		findOne: mockedFindOne,
 		insertOne: mockedInsertOne,
 		findOneAndUpdate: mockedFindOneAndUpdate,
+		findOneAndDelete: mockedFindOneAndDelete,
 	};
 });
 
 import {
+	deleteShoppingListById,
 	findAllShoppingLists,
 	findShoppingListById,
 	findShoppingListsByName,
@@ -204,6 +207,41 @@ describe('shopping lists repository functions', () => {
 			const result = await updateShoppingListById(shoppingListId, {
 				name: 'New name',
 			});
+			expect(result).toBe(result);
+		});
+	});
+
+	describe('deleteShoppingListById', () => {
+		const shoppingListId = '63552a5d00ca2e59a40c1f53';
+		it('throws error from findOneAndDelete', async () => {
+			mockedFindOneAndDelete.mockRejectedValueOnce(new Error('boom'));
+			await expect(deleteShoppingListById(shoppingListId)).rejects.toThrowError(
+				'boom'
+			);
+		});
+		it('logs error from findOneAndDelete', async () => {
+			mockedFindOneAndDelete.mockRejectedValueOnce(new Error('boom'));
+			try {
+				await deleteShoppingListById(shoppingListId);
+			} catch {}
+			expect(mockedError).toHaveBeenCalledWith({
+				message: 'Unable to delete shopping list by Id',
+				description: 'boom',
+				id: shoppingListId,
+			});
+		});
+		it('calls findOneAndDelete with correct payload', async () => {
+			mockedFindOneAndDelete.mockRejectedValueOnce(new Error('boom'));
+			try {
+				await deleteShoppingListById(shoppingListId);
+			} catch {}
+			expect(mockedFindOneAndDelete).toHaveBeenCalledWith('shopping-lists', {
+				_id: new ObjectId(shoppingListId),
+			});
+		});
+		it('returns the correct value', async () => {
+			mockedFindOneAndDelete.mockResolvedValueOnce(false);
+			const result = await deleteShoppingListById(shoppingListId);
 			expect(result).toBe(result);
 		});
 	});

@@ -2,18 +2,21 @@ const mockedFindShoppingListById = jest.fn();
 const mockedFindShoppingListsByName = jest.fn();
 const mockedInsertNewShoppingList = jest.fn();
 const mockedUpdateShoppingListById = jest.fn();
+const mockedDeleteShoppingListById = jest.fn();
 jest.mock('../../repositories/shopping-lists', () => {
 	return {
 		findShoppingListById: mockedFindShoppingListById,
 		findShoppingListsByName: mockedFindShoppingListsByName,
 		insertNewShoppingList: mockedInsertNewShoppingList,
 		updateShoppingListById: mockedUpdateShoppingListById,
+		deleteShoppingListById: mockedDeleteShoppingListById,
 	};
 });
 
 import { mockedError } from '../../../jest/setupTests';
 import {
 	addNewShoppingList,
+	deleteShoppingList,
 	getShoppingListById,
 	updateShoppingList,
 } from '../shopping-lists';
@@ -274,6 +277,64 @@ describe('Shopping lists service functions', () => {
 				name: 'Stationary',
 				items: [],
 				id: shoppingListId,
+			});
+		});
+	});
+
+	describe('deleteShoppingList', () => {
+		const shoppingListId = '635a72d64ab70da3b2628549';
+		it('throws error from deleteShoppingListById', async () => {
+			mockedDeleteShoppingListById.mockRejectedValueOnce(new Error('boom'));
+			await expect(deleteShoppingList(shoppingListId)).rejects.toThrowError(
+				'boom'
+			);
+		});
+		it('logs error from deleteShoppingListById', async () => {
+			mockedDeleteShoppingListById.mockRejectedValueOnce(new Error('boom'));
+			try {
+				await deleteShoppingList(shoppingListId);
+			} catch {}
+			expect(mockedError).toHaveBeenCalledWith({
+				message: 'Unable to delete shopping list',
+				description: 'boom',
+				id: shoppingListId,
+			});
+		});
+		it('calls deleteShoppingListById with correct payload', async () => {
+			mockedDeleteShoppingListById.mockRejectedValueOnce(new Error('boom'));
+			try {
+				await deleteShoppingList(shoppingListId);
+			} catch {}
+			expect(mockedDeleteShoppingListById).toHaveBeenCalledWith(shoppingListId);
+		});
+		it('throws error because result is false', async () => {
+			mockedDeleteShoppingListById.mockResolvedValueOnce(false);
+			await expect(deleteShoppingList(shoppingListId)).rejects.toThrowError(
+				'Unable to delete shopping list'
+			);
+		});
+		it('logs error because result is false', async () => {
+			mockedDeleteShoppingListById.mockResolvedValueOnce(false);
+			try {
+				await deleteShoppingList(shoppingListId);
+			} catch {}
+			expect(mockedError).toHaveBeenCalledWith({
+				message: 'Unable to delete shopping list',
+				description: 'Unable to delete shopping list',
+				id: shoppingListId,
+			});
+		});
+		it('returns deleted shopping list', async () => {
+			mockedDeleteShoppingListById.mockResolvedValueOnce({
+				name: 'Groceries',
+				items: [],
+				id: '635a72d64ab70da3b2628549',
+			});
+			const result = await deleteShoppingList(shoppingListId);
+			expect(result).toStrictEqual({
+				name: 'Groceries',
+				items: [],
+				id: '635a72d64ab70da3b2628549',
 			});
 		});
 	});

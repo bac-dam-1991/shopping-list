@@ -6,6 +6,7 @@ import { connectToMongo } from '../repositories/adapters/mongo';
 import { findAllShoppingLists } from '../repositories/shopping-lists';
 import {
 	addNewShoppingList,
+	deleteShoppingList,
 	getShoppingListById,
 	updateShoppingList,
 } from '../services/shopping-lists';
@@ -56,14 +57,8 @@ router.put('/:id', async (req, res, next) => {
 router.delete('/:id', async (req, res, next) => {
 	try {
 		const { id } = req.params;
-		const db = await connectToMongo();
-		const collection = db.collection(ShoppingListCollection);
-		const result = await collection.findOneAndDelete({ _id: new ObjectId(id) });
-		if (!result.value) {
-			throw new ResourceDoesNotExistError('Shopping list does not exist.');
-		}
-		const { _id, ...rest } = result.value;
-		res.status(200).json({ id: _id.toString(), ...rest });
+		const result = await deleteShoppingList(id);
+		res.status(200).json(result);
 	} catch (error) {
 		next(error);
 	}

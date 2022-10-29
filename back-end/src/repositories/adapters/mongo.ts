@@ -153,3 +153,34 @@ export const findOneAndUpdate = async <T extends Document = Document>(
 		throw error;
 	}
 };
+
+/**
+ * Wrapper around MongoDB's `findOneAndDelete` function.
+ * It abstracts away the connection to MongoDB.
+ * @template [T=Document]
+ * @param {string} collectionName - The collection name
+ * @param {Filter<Document>} filter - The filter
+ * @returns {Promise<false | WithId<T>>} The document before deletion or false
+ */
+export const findOneAndDelete = async <T extends Document = Document>(
+	collectionName: string,
+	filter: Filter<Document>
+): Promise<false | WithId<T>> => {
+	try {
+		const db = await connectToMongo();
+		const collection = db.collection(collectionName);
+		const result = await collection.findOneAndDelete(filter);
+		if (!result.value) {
+			return false;
+		}
+		const { _id, ...rest } = result.value;
+		return { id: _id.toString(), ...rest } as WithId<T>;
+	} catch (error) {
+		console.error({
+			message: 'Unable to findOneAndDelete',
+			description: (error as Error).message,
+			filter,
+		});
+		throw error;
+	}
+};

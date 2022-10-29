@@ -8,6 +8,7 @@ import {
 	insertNewShoppingList,
 	findShoppingListsByName as findShoppingListsByName,
 	updateShoppingListById,
+	deleteShoppingListById,
 } from '../repositories/shopping-lists';
 
 /**
@@ -94,6 +95,32 @@ export const updateShoppingList = async (
 			description: (error as Error).message,
 			id,
 			payload,
+		});
+		throw error;
+	}
+};
+
+/**
+ * Delete a shopping list by a given Id.
+ * If deletion is not successful, an error is thrown.
+ * @param {string} id - The shopping list Id
+ * @param {string} payload.name - The new name of the shopping list
+ * @returns {Promise<WithId<ShoppingList>>} The updated shopping list
+ */
+export const deleteShoppingList = async (
+	id: string
+): Promise<WithId<ShoppingList>> => {
+	try {
+		const result = await deleteShoppingListById(id);
+		if (!result) {
+			throw new ResourceDoesNotExistError('Unable to delete shopping list');
+		}
+		return result;
+	} catch (error) {
+		console.error({
+			message: 'Unable to delete shopping list',
+			description: (error as Error).message,
+			id,
 		});
 		throw error;
 	}

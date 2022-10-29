@@ -2,6 +2,7 @@ import { ObjectId } from 'mongodb';
 import {
 	find,
 	findOne,
+	findOneAndDelete,
 	findOneAndUpdate,
 	insertOne,
 	WithId,
@@ -121,6 +122,28 @@ export const updateShoppingListById = async (
 			description: (error as Error).message,
 			id,
 			payload,
+		});
+		throw error;
+	}
+};
+
+/**
+ * Delete shopping list by Id
+ * @param {string} id - The shopping list Id
+ * @returns {Promise<false | WithId<ShoppingList>>} The shopping list before deletion or false
+ */
+export const deleteShoppingListById = async (
+	id: string
+): Promise<false | WithId<ShoppingList>> => {
+	try {
+		return await findOneAndDelete<ShoppingList>(ShoppingListCollection, {
+			_id: new ObjectId(id),
+		});
+	} catch (error) {
+		console.error({
+			message: 'Unable to delete shopping list by Id',
+			description: (error as Error).message,
+			id,
 		});
 		throw error;
 	}
