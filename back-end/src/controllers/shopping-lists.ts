@@ -7,6 +7,7 @@ import { findAllShoppingLists } from '../repositories/shopping-lists';
 import {
 	addNewShoppingList,
 	getShoppingListById,
+	updateShoppingList,
 } from '../services/shopping-lists';
 const router = express.Router();
 
@@ -45,17 +46,8 @@ router.put('/:id', async (req, res, next) => {
 	try {
 		const { name } = req.body;
 		const { id } = req.params;
-		const db = await connectToMongo();
-		const collection = db.collection(ShoppingListCollection);
-		const result = await collection.findOneAndUpdate(
-			{ _id: new ObjectId(id) },
-			{ $set: { name } }
-		);
-		if (!result.value) {
-			throw new ResourceDoesNotExistError('Shopping list does not exist.');
-		}
-		const { _id, ...rest } = result.value;
-		res.status(200).json({ id: _id.toString(), ...rest });
+		const updatedShoppingList = await updateShoppingList(id, { name });
+		res.status(200).json(updatedShoppingList);
 	} catch (error) {
 		next(error);
 	}

@@ -1,19 +1,22 @@
 const mockedFind = jest.fn();
 const mockedFindOne = jest.fn();
 const mockedInsertOne = jest.fn();
+const mockedFindOneAndUpdate = jest.fn();
 jest.mock('../adapters/mongo', () => {
 	return {
 		find: mockedFind,
 		findOne: mockedFindOne,
 		insertOne: mockedInsertOne,
+		findOneAndUpdate: mockedFindOneAndUpdate,
 	};
 });
 
 import {
 	findAllShoppingLists,
 	findShoppingListById,
-	findShoppingListByName,
+	findShoppingListsByName,
 	insertNewShoppingList,
+	updateShoppingListById,
 } from '../shopping-lists';
 import { mockedError } from '../../../jest/setupTests';
 import { ObjectId } from 'mongodb';
@@ -128,16 +131,16 @@ describe('shopping lists repository functions', () => {
 			expect(result).toStrictEqual({ id: shoppingListId, ...payload });
 		});
 	});
-	describe('findShoppingListByName', () => {
+	describe('findShoppingListsByName', () => {
 		const name = 'Fruits and Vegs';
 		it('throws error from find', async () => {
 			mockedFind.mockRejectedValueOnce(new Error('boom'));
-			await expect(findShoppingListByName(name)).rejects.toThrowError('boom');
+			await expect(findShoppingListsByName(name)).rejects.toThrowError('boom');
 		});
 		it('logs error from find', async () => {
 			mockedFind.mockRejectedValueOnce(new Error('boom'));
 			try {
-				await findShoppingListByName(name);
+				await findShoppingListsByName(name);
 			} catch {}
 			expect(mockedError).toHaveBeenCalledWith({
 				message: 'Unable to find shopping list by name',
@@ -148,7 +151,7 @@ describe('shopping lists repository functions', () => {
 		it('calls find with correct payload', async () => {
 			mockedFind.mockRejectedValueOnce(new Error('boom'));
 			try {
-				await findShoppingListByName(name);
+				await findShoppingListsByName(name);
 			} catch {}
 			expect(mockedFind).toHaveBeenCalledWith('shopping-lists', { name });
 		});
@@ -156,10 +159,52 @@ describe('shopping lists repository functions', () => {
 			mockedFind.mockResolvedValueOnce([
 				{ id: '635a732b98ca699215c94708', name: 'Fruits and Vegs', items: [] },
 			]);
-			const result = await findShoppingListByName(name);
+			const result = await findShoppingListsByName(name);
 			expect(result).toStrictEqual([
 				{ id: '635a732b98ca699215c94708', name: 'Fruits and Vegs', items: [] },
 			]);
+		});
+	});
+
+	describe('updateShoppingListById', () => {
+		const shoppingListId = '63552a5d00ca2e59a40c1f53';
+		it('throws error from findOneAndUpdate', async () => {
+			mockedFindOneAndUpdate.mockRejectedValueOnce(new Error('boom'));
+			await expect(
+				updateShoppingListById(shoppingListId, { name: 'New name' })
+			).rejects.toThrowError('boom');
+		});
+		it('logs error from findOneAndUpdate', async () => {
+			mockedFindOneAndUpdate.mockRejectedValueOnce(new Error('boom'));
+			try {
+				await updateShoppingListById(shoppingListId, { name: 'New name' });
+			} catch {}
+			expect(mockedError).toHaveBeenCalledWith({
+				message: 'Unable to update shopping list by Id',
+				description: 'boom',
+				id: shoppingListId,
+				payload: { name: 'New name' },
+			});
+		});
+		it('calls findOneAndUpdate with correct payload', async () => {
+			mockedFindOneAndUpdate.mockRejectedValueOnce(new Error('boom'));
+			try {
+				await updateShoppingListById(shoppingListId, { name: 'New name' });
+			} catch {}
+			expect(mockedFindOneAndUpdate).toHaveBeenCalledWith(
+				'shopping-lists',
+				{
+					_id: new ObjectId(shoppingListId),
+				},
+				{ $set: { name: 'New name' } }
+			);
+		});
+		it('returns the correct value', async () => {
+			mockedFindOneAndUpdate.mockResolvedValueOnce(false);
+			const result = await updateShoppingListById(shoppingListId, {
+				name: 'New name',
+			});
+			expect(result).toBe(result);
 		});
 	});
 });

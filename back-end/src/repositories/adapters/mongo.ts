@@ -1,4 +1,11 @@
-import { Filter, MongoClient, Document, FindOptions } from 'mongodb';
+import {
+	Filter,
+	MongoClient,
+	Document,
+	FindOptions,
+	UpdateFilter,
+} from 'mongodb';
+import { ShoppingList } from '../shopping-lists';
 
 export type WithId<T> = T & { id: string };
 
@@ -108,6 +115,40 @@ export const insertOne = async <T extends Document = Document>(
 			message: 'Unable to insertOne',
 			description: (error as Error).message,
 			document,
+		});
+		throw error;
+	}
+};
+
+/**
+ * Wrapper around MongoDB's `findOneAndUpdate` function.
+ * It abstracts away the connection to MongoDB.
+ * @template [T=Document]
+ * @param {string} collectionName - The collection name
+ * @param {Filter<Document>} filter - The filter
+ * @param {UpdateFilter<Document>} update - The update document
+ * @returns {Promise<false | WithId<T>>} The document before update or false
+ */
+export const findOneAndUpdate = async <T extends Document = Document>(
+	collectionName: string,
+	filter: Filter<Document>,
+	update: UpdateFilter<Document>
+): Promise<false | WithId<T>> => {
+	try {
+		const db = await connectToMongo();
+		const collection = db.collection(collectionName);
+		const result = await collection.findOneAndUpdate(filter, update);
+		if (!result.value) {
+			return false;
+		}
+		const { _id, ...rest } = result.value;
+		return { id: _id.toString(), ...rest } as WithId<T>;
+	} catch (error) {
+		console.error({
+			message: 'Unable to findOneAndUpdate',
+			description: (error as Error).message,
+			filter,
+			update,
 		});
 		throw error;
 	}

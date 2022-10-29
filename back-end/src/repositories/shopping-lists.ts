@@ -1,5 +1,11 @@
 import { ObjectId } from 'mongodb';
-import { find, findOne, insertOne, WithId } from './adapters/mongo';
+import {
+	find,
+	findOne,
+	findOneAndUpdate,
+	insertOne,
+	WithId,
+} from './adapters/mongo';
 
 const ShoppingListCollection = 'shopping-lists';
 
@@ -77,7 +83,7 @@ export const insertNewShoppingList = async (
  * @param {string} name - The shopping list name
  * @returns {Promise<WithId<ShoppingList>[]>} The array of shopping lists with the same name
  */
-export const findShoppingListByName = async (
+export const findShoppingListsByName = async (
 	name: string
 ): Promise<WithId<ShoppingList>[]> => {
 	try {
@@ -87,6 +93,34 @@ export const findShoppingListByName = async (
 			message: 'Unable to find shopping list by name',
 			description: (error as Error).message,
 			name,
+		});
+		throw error;
+	}
+};
+
+/**
+ * Update shopping list by Id
+ * @param {string} id - The shopping list Id
+ * @param {string} payload.name - The new name of the shopping list
+ * @returns {Promise<false | WithId<ShoppingList>>} The shopping list before update or false
+ */
+export const updateShoppingListById = async (
+	id: string,
+	payload: { name: string }
+): Promise<false | WithId<ShoppingList>> => {
+	try {
+		const { name } = payload;
+		return await findOneAndUpdate<ShoppingList>(
+			ShoppingListCollection,
+			{ _id: new ObjectId(id) },
+			{ $set: { name } }
+		);
+	} catch (error) {
+		console.error({
+			message: 'Unable to update shopping list by Id',
+			description: (error as Error).message,
+			id,
+			payload,
 		});
 		throw error;
 	}

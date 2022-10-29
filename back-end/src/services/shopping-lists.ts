@@ -1,11 +1,13 @@
 import { DuplicationError } from '../custom-errors/DuplicationError';
 import { ResourceDoesNotExistError } from '../custom-errors/ResourceDoesNotExistError';
+import { UpdateError } from '../custom-errors/UpdateError';
 import { WithId } from '../repositories/adapters/mongo';
 import {
 	ShoppingList,
 	findShoppingListById,
 	insertNewShoppingList,
-	findShoppingListByName,
+	findShoppingListsByName as findShoppingListsByName,
+	updateShoppingListById,
 } from '../repositories/shopping-lists';
 
 /**
@@ -43,7 +45,7 @@ export const addNewShoppingList = async (
 	name: string
 ): Promise<WithId<ShoppingList>> => {
 	try {
-		const shoppingLists = await findShoppingListByName(name);
+		const shoppingLists = await findShoppingListsByName(name);
 		if (shoppingLists.length > 0) {
 			throw new DuplicationError(
 				'Shopping list with the same name already exists.'
@@ -58,6 +60,40 @@ export const addNewShoppingList = async (
 			message: 'Unable to add new shopping list',
 			description: (error as Error).message,
 			name,
+		});
+		throw error;
+	}
+};
+
+/**
+ * Update a shopping list by a given Id.
+ * If there are shopping lists of the same name, an error is thrown.
+ * If update is not successful, an error is thrown.
+ * @param {string} id - The shopping list Id
+ * @param {string} payload.name - The new name of the shopping list
+ * @returns {Promise<WithId<ShoppingList>>} The updated shopping list
+ */
+export const updateShoppingList = async (
+	id: string,
+	payload: { name: string }
+): Promise<WithId<ShoppingList>> => {
+	try {
+		const { name } = payload;
+		const shoppingLists = await findShoppingListsByName(name);
+		if (shoppingLists.length > 0) {
+			throw new DuplicationError('Shopping list name already exists');
+		}
+		const result = await updateShoppingListById(id, payload);
+		if (!result) {
+			throw new UpdateError('Unable to update shopping list');
+		}
+		return result;
+	} catch (error) {
+		console.error({
+			message: 'Unable to update shopping list',
+			description: (error as Error).message,
+			id,
+			payload,
 		});
 		throw error;
 	}
