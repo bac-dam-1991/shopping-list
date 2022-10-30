@@ -1,7 +1,7 @@
 import { DuplicationError } from '../custom-errors/DuplicationError';
 import { ResourceDoesNotExistError } from '../custom-errors/ResourceDoesNotExistError';
 import { UpdateError } from '../custom-errors/UpdateError';
-import { WithId } from '../repositories/adapters/mongo';
+import { WithId, WithOptionalId } from '../repositories/adapters/mongo';
 import {
 	ShoppingList,
 	findShoppingListById,
@@ -9,6 +9,8 @@ import {
 	findShoppingListsByName as findShoppingListsByName,
 	updateShoppingListById,
 	deleteShoppingListById,
+	ShoppingItem,
+	addItemToShoppingList,
 } from '../repositories/shopping-lists';
 
 /**
@@ -114,6 +116,49 @@ export const deleteShoppingList = async (
 		const result = await deleteShoppingListById(id);
 		if (!result) {
 			throw new ResourceDoesNotExistError('Unable to delete shopping list');
+		}
+		return result;
+	} catch (error) {
+		console.error({
+			message: 'Unable to delete shopping list',
+			description: (error as Error).message,
+			id,
+		});
+		throw error;
+	}
+};
+
+/**
+ * Add a shopping item to the shopping list
+ * If adding item to shopping list is not successful, an error is thrown
+ * If the an item with the same name already exists, add the quantities together
+ * @param {string} id - The shopping list Id
+ * @param {ShoppingItem} item - The new shopping item
+ * @returns {Promise<WithId<ShoppingItem>>} The updated shopping item
+ */
+export const addNewItemToShoppingList = async (
+	id: string,
+	item: ShoppingItem
+): Promise<WithId<ShoppingItem>> => {
+	try {
+		const shoppingList = await findShoppingListById(id);
+		if (!shoppingList) {
+			throw new ResourceDoesNotExistError('Shopping list does not exist');
+		}
+		const sameItem = shoppingList.items.find((i) => i.name === item.name);
+		let itemToUpdate: WithOptionalId<ShoppingItem> = {
+			...item,
+		};
+		if (sameItem) {
+			itemToUpdate = {
+				...sameItem,
+				...itemToUpdate,
+				quantity: itemToUpdate.quantity + sameItem.quantity,
+			};
+		}
+		const result = await addItemToShoppingList(id, itemToUpdate);
+		if (!result) {
+			throw new UpdateError('Unable to add item to shopping list');
 		}
 		return result;
 	} catch (error) {

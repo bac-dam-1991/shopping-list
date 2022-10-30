@@ -5,9 +5,8 @@ import {
 	FindOptions,
 	UpdateFilter,
 } from 'mongodb';
-import { ShoppingList } from '../shopping-lists';
-
 export type WithId<T> = T & { id: string };
+export type WithOptionalId<T> = T & { id?: string };
 
 export const connectToMongo = async () => {
 	try {
@@ -180,6 +179,38 @@ export const findOneAndDelete = async <T extends Document = Document>(
 			message: 'Unable to findOneAndDelete',
 			description: (error as Error).message,
 			filter,
+		});
+		throw error;
+	}
+};
+
+/**
+ * Wrapper around MongoDB's `updateOne` function.
+ * It abstracts away the connection to MongoDB.
+ * @param {string} collectionName - The collection name
+ * @param {Filter<Document>} filter - The filter
+ * @param {Partial<Document> | UpdateFilter<Document>} update - The update document
+ * @returns {Promise<boolean>} True if successful else false
+ */
+export const updateOne = async (
+	collectionName: string,
+	filter: Filter<Document>,
+	update: Partial<Document> | UpdateFilter<Document>
+): Promise<boolean> => {
+	try {
+		const db = await connectToMongo();
+		const collection = db.collection(collectionName);
+		const result = await collection.updateOne(filter, update);
+		if (!result.modifiedCount) {
+			return false;
+		}
+		return true;
+	} catch (error) {
+		console.error({
+			message: 'Unable to updateOne',
+			description: (error as Error).message,
+			filter,
+			update,
 		});
 		throw error;
 	}

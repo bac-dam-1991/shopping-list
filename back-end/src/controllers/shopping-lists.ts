@@ -1,10 +1,10 @@
 import express from 'express';
 import { ObjectId } from 'mongodb';
-import { ResourceDoesNotExistError } from '../custom-errors/ResourceDoesNotExistError';
 import { UpdateError } from '../custom-errors/UpdateError';
 import { connectToMongo } from '../repositories/adapters/mongo';
 import { findAllShoppingLists } from '../repositories/shopping-lists';
 import {
+	addNewItemToShoppingList,
 	addNewShoppingList,
 	deleteShoppingList,
 	getShoppingListById,
@@ -68,24 +68,13 @@ router.post('/:id/items/add', async (req, res, next) => {
 	try {
 		const { id } = req.params;
 		const { name, status, quantity, unit } = req.body;
-		const itemId = new ObjectId().toString();
-		const newItem = { id: itemId, name, status, quantity, unit };
-		const db = await connectToMongo();
-		const collection = db.collection(ShoppingListCollection);
-		const result = await collection.updateOne(
-			{
-				_id: new ObjectId(id),
-			},
-			{
-				$push: {
-					items: newItem,
-				},
-			}
-		);
-		if (!result.modifiedCount) {
-			throw new UpdateError('Unable to add item to shopping list');
-		}
-		res.status(201).json(newItem);
+		const result = await addNewItemToShoppingList(id, {
+			name,
+			status,
+			quantity,
+			unit,
+		});
+		res.status(201).json(result);
 	} catch (error) {
 		next(error);
 	}

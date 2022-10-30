@@ -5,13 +5,14 @@ import {
 	findOneAndDelete,
 	findOneAndUpdate,
 	insertOne,
+	updateOne,
 	WithId,
+	WithOptionalId,
 } from './adapters/mongo';
 
 const ShoppingListCollection = 'shopping-lists';
 
 export interface ShoppingItem {
-	id: string;
 	name: string;
 	unit: string;
 	quantity: number;
@@ -20,7 +21,7 @@ export interface ShoppingItem {
 
 export interface ShoppingList {
 	name: string;
-	items: ShoppingItem[];
+	items: WithId<ShoppingItem>[];
 }
 
 export const findAllShoppingLists = async (): Promise<
@@ -139,6 +140,53 @@ export const deleteShoppingListById = async (
 		return await findOneAndDelete<ShoppingList>(ShoppingListCollection, {
 			_id: new ObjectId(id),
 		});
+	} catch (error) {
+		console.error({
+			message: 'Unable to delete shopping list by Id',
+			description: (error as Error).message,
+			id,
+		});
+		throw error;
+	}
+};
+
+/**
+ * Add item to shopping list
+ * @param {string} id - The shopping list Id
+ * @param {ShoppingItem} item - The new shopping item
+ * @returns {Promise<null | WithId<ShoppingItem>>} The newly added shopping item or null
+ */
+export const addItemToShoppingList = async (
+	id: string,
+	item: WithOptionalId<ShoppingItem>
+): Promise<null | WithId<ShoppingItem>> => {
+	try {
+		const itemId = item.id ? item.id : new ObjectId().toString();
+		const newItem: WithId<ShoppingItem> = {
+			id: itemId,
+			...item,
+		};
+		let filter: any = {
+			_id: new ObjectId(id),
+		};
+		let operation: any = { $push: { items: newItem } };
+		if (item.id) {
+			filter = { ...filter, 'items.id': item.id };
+			operation = {
+				$set: {
+					'items.$': newItem,
+				},
+			};
+		}
+		const result = await updateOne(
+			ShoppingListCollection,
+			{ ...filter },
+			{ ...operation }
+		);
+		if (!result) {
+			return null;
+		}
+		return newItem;
 	} catch (error) {
 		console.error({
 			message: 'Unable to delete shopping list by Id',
