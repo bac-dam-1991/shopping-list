@@ -3,6 +3,7 @@ const mockedFindOne = jest.fn();
 const mockedInsertOne = jest.fn();
 const mockedFindOneAndUpdate = jest.fn();
 const mockedFindOneAndDelete = jest.fn();
+const mockedUpdateOne = jest.fn();
 jest.mock('../adapters/mongo', () => {
 	return {
 		find: mockedFind,
@@ -10,19 +11,24 @@ jest.mock('../adapters/mongo', () => {
 		insertOne: mockedInsertOne,
 		findOneAndUpdate: mockedFindOneAndUpdate,
 		findOneAndDelete: mockedFindOneAndDelete,
+		updateOne: mockedUpdateOne,
 	};
 });
 
 import {
+	addItemToShoppingList,
 	deleteShoppingListById,
 	findAllShoppingLists,
 	findShoppingListById,
 	findShoppingListsByName,
 	insertNewShoppingList,
+	ShoppingItem,
+	updateItemInShoppingList,
 	updateShoppingListById,
 } from '../shopping-lists';
 import { mockedError } from '../../../jest/setupTests';
 import { ObjectId } from 'mongodb';
+import { WithId } from '../adapters/mongo';
 
 describe('shopping lists repository functions', () => {
 	describe('findAllShoppingLists', () => {
@@ -243,6 +249,122 @@ describe('shopping lists repository functions', () => {
 			mockedFindOneAndDelete.mockResolvedValueOnce(false);
 			const result = await deleteShoppingListById(shoppingListId);
 			expect(result).toBe(result);
+		});
+	});
+
+	describe('addItemToShoppingList', () => {
+		const shoppingListId = '635a732b98ca699215c94708';
+		const item: ShoppingItem = {
+			name: 'Test Item',
+			quantity: 1,
+			unit: 'test',
+			status: 'New',
+		};
+		it('throws error from updateOne', async () => {
+			mockedUpdateOne.mockRejectedValueOnce(new Error('boom'));
+			await expect(
+				addItemToShoppingList(shoppingListId, item)
+			).rejects.toThrowError('boom');
+		});
+		it('logs error from updateOne', async () => {
+			mockedUpdateOne.mockRejectedValueOnce(new Error('boom'));
+			try {
+				await addItemToShoppingList(shoppingListId, item);
+			} catch {}
+			expect(mockedError).toHaveBeenCalledWith({
+				message: 'Unable to add item to shopping list',
+				description: 'boom',
+				shoppingListId,
+				item,
+			});
+		});
+		it('calls updateOne with correct payload', async () => {
+			mockedUpdateOne.mockRejectedValueOnce(new Error('boom'));
+			try {
+				await addItemToShoppingList(shoppingListId, item);
+			} catch {}
+			expect(mockedUpdateOne).toHaveBeenCalledWith(
+				'shopping-lists',
+				{
+					_id: new ObjectId(shoppingListId),
+				},
+				{ $push: { items: expect.objectContaining(item) } }
+			);
+		});
+		it('returns null because result is false', async () => {
+			mockedUpdateOne.mockResolvedValueOnce(false);
+			const result = await addItemToShoppingList(shoppingListId, item);
+			expect(result).toBeNull();
+		});
+		it('returns newly added shopping item', async () => {
+			mockedUpdateOne.mockResolvedValueOnce(true);
+			const result = await addItemToShoppingList(shoppingListId, item);
+			expect(result).toStrictEqual(expect.objectContaining(item));
+		});
+	});
+
+	describe('updateItemInShoppingList', () => {
+		const shoppingListId = '635a732b98ca699215c94708';
+		const shoppingItem: WithId<ShoppingItem> = {
+			id: '635e68f7da7f6722c6441104',
+			name: 'Test Item',
+			quantity: 1,
+			unit: 'test',
+			status: 'New',
+		};
+		it('throws error from updateOne', async () => {
+			mockedUpdateOne.mockRejectedValueOnce(new Error('boom'));
+			await expect(
+				updateItemInShoppingList(shoppingListId, shoppingItem)
+			).rejects.toThrowError('boom');
+		});
+		it('logs error from updateOne', async () => {
+			mockedUpdateOne.mockRejectedValueOnce(new Error('boom'));
+			try {
+				await updateItemInShoppingList(shoppingListId, shoppingItem);
+			} catch {}
+			expect(mockedError).toHaveBeenCalledWith({
+				message: 'Unable to update item in shopping list',
+				description: 'boom',
+				shoppingListId,
+				shoppingItem,
+			});
+		});
+		it('calls updateOne with correct payload', async () => {
+			mockedUpdateOne.mockRejectedValueOnce(new Error('boom'));
+			try {
+				await updateItemInShoppingList(shoppingListId, shoppingItem);
+			} catch {}
+			expect(mockedUpdateOne).toHaveBeenCalledWith(
+				'shopping-lists',
+				{
+					_id: new ObjectId(shoppingListId),
+					'items.id': shoppingItem.id,
+				},
+				{
+					$set: {
+						'items.$': {
+							...shoppingItem,
+						},
+					},
+				}
+			);
+		});
+		it('returns null because result is false', async () => {
+			mockedUpdateOne.mockResolvedValueOnce(false);
+			const result = await updateItemInShoppingList(
+				shoppingListId,
+				shoppingItem
+			);
+			expect(result).toBeNull();
+		});
+		it('returns newly added shopping item', async () => {
+			mockedUpdateOne.mockResolvedValueOnce(true);
+			const result = await updateItemInShoppingList(
+				shoppingListId,
+				shoppingItem
+			);
+			expect(result).toStrictEqual(shoppingItem);
 		});
 	});
 });

@@ -7,7 +7,6 @@ import {
 	insertOne,
 	updateOne,
 	WithId,
-	WithOptionalId,
 } from './adapters/mongo';
 
 const ShoppingListCollection = 'shopping-lists';
@@ -152,36 +151,26 @@ export const deleteShoppingListById = async (
 
 /**
  * Add item to shopping list
- * @param {string} id - The shopping list Id
+ * @param {string} shoppingListId - The shopping list Id
  * @param {ShoppingItem} item - The new shopping item
  * @returns {Promise<null | WithId<ShoppingItem>>} The newly added shopping item or null
  */
 export const addItemToShoppingList = async (
-	id: string,
-	item: WithOptionalId<ShoppingItem>
+	shoppingListId: string,
+	item: ShoppingItem
 ): Promise<null | WithId<ShoppingItem>> => {
 	try {
-		const itemId = item.id ? item.id : new ObjectId().toString();
+		const itemId = new ObjectId().toString();
 		const newItem: WithId<ShoppingItem> = {
 			id: itemId,
 			...item,
 		};
-		let filter: any = {
-			_id: new ObjectId(id),
-		};
-		let operation: any = { $push: { items: newItem } };
-		if (item.id) {
-			filter = { ...filter, 'items.id': item.id };
-			operation = {
-				$set: {
-					'items.$': newItem,
-				},
-			};
-		}
 		const result = await updateOne(
 			ShoppingListCollection,
-			{ ...filter },
-			{ ...operation }
+			{
+				_id: new ObjectId(shoppingListId),
+			},
+			{ $push: { items: newItem } }
 		);
 		if (!result) {
 			return null;
@@ -189,9 +178,50 @@ export const addItemToShoppingList = async (
 		return newItem;
 	} catch (error) {
 		console.error({
-			message: 'Unable to delete shopping list by Id',
+			message: 'Unable to add item to shopping list',
 			description: (error as Error).message,
-			id,
+			shoppingListId,
+			item,
+		});
+		throw error;
+	}
+};
+
+/**
+ * Update an existing item in the provided shopping list
+ * @param {string} shoppingListId - The Id of the shopping list
+ * @param {WithId<ShoppingItem>} shoppingItem - The shopping item to update
+ * @returns {Promise<WithId<ShoppingItem> | null>} The updated shopping item
+ */
+export const updateItemInShoppingList = async (
+	shoppingListId: string,
+	shoppingItem: WithId<ShoppingItem>
+): Promise<WithId<ShoppingItem> | null> => {
+	try {
+		const result = await updateOne(
+			ShoppingListCollection,
+			{
+				_id: new ObjectId(shoppingListId),
+				'items.id': shoppingItem.id,
+			},
+			{
+				$set: {
+					'items.$': {
+						...shoppingItem,
+					},
+				},
+			}
+		);
+		if (!result) {
+			return null;
+		}
+		return shoppingItem;
+	} catch (error) {
+		console.error({
+			message: 'Unable to update item in shopping list',
+			description: (error as Error).message,
+			shoppingListId,
+			shoppingItem,
 		});
 		throw error;
 	}

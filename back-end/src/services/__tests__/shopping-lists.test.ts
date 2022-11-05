@@ -3,6 +3,8 @@ const mockedFindShoppingListsByName = jest.fn();
 const mockedInsertNewShoppingList = jest.fn();
 const mockedUpdateShoppingListById = jest.fn();
 const mockedDeleteShoppingListById = jest.fn();
+const mockedUpdateItemInShoppingList = jest.fn();
+const mockedAddItemToShoppingList = jest.fn();
 jest.mock('../../repositories/shopping-lists', () => {
 	return {
 		findShoppingListById: mockedFindShoppingListById,
@@ -10,11 +12,15 @@ jest.mock('../../repositories/shopping-lists', () => {
 		insertNewShoppingList: mockedInsertNewShoppingList,
 		updateShoppingListById: mockedUpdateShoppingListById,
 		deleteShoppingListById: mockedDeleteShoppingListById,
+		updateItemInShoppingList: mockedUpdateItemInShoppingList,
+		addItemToShoppingList: mockedAddItemToShoppingList,
 	};
 });
 
 import { mockedError } from '../../../jest/setupTests';
+import { ShoppingItem } from '../../repositories/shopping-lists';
 import {
+	addNewItemToShoppingList,
 	addNewShoppingList,
 	deleteShoppingList,
 	getShoppingListById,
@@ -335,6 +341,245 @@ describe('Shopping lists service functions', () => {
 				name: 'Groceries',
 				items: [],
 				id: '635a72d64ab70da3b2628549',
+			});
+		});
+	});
+
+	describe('addNewItemToShoppingList', () => {
+		const shoppingListId = '63552a5d00ca2e59a40c1f53';
+		const item: ShoppingItem = {
+			name: 'bananas',
+			status: 'New',
+			quantity: 1,
+			unit: 'piece',
+		};
+		it('throws error from findShoppingListById', async () => {
+			mockedFindShoppingListById.mockRejectedValueOnce(new Error('boom'));
+			await expect(
+				addNewItemToShoppingList(shoppingListId, item)
+			).rejects.toThrowError('boom');
+		});
+		it('logs error from findShoppingListById', async () => {
+			mockedFindShoppingListById.mockRejectedValueOnce(new Error('boom'));
+			try {
+				await addNewItemToShoppingList(shoppingListId, item);
+			} catch {}
+			expect(mockedError).toHaveBeenCalledWith({
+				message: 'Unable to add item to shopping list',
+				description: 'boom',
+				shoppingListId,
+				item,
+			});
+		});
+		it('calls findShoppingListById with correct payload', async () => {
+			mockedFindShoppingListById.mockRejectedValueOnce(new Error('boom'));
+			try {
+				await addNewItemToShoppingList(shoppingListId, item);
+			} catch {}
+			expect(mockedFindShoppingListById).toHaveBeenCalledWith(shoppingListId);
+		});
+		it('throws error because shopping list is null', async () => {
+			mockedFindShoppingListById.mockResolvedValueOnce(null);
+			await expect(
+				addNewItemToShoppingList(shoppingListId, item)
+			).rejects.toThrowError('Shopping list does not exist');
+		});
+		it('logs error because shopping list is null', async () => {
+			mockedFindShoppingListById.mockResolvedValueOnce(null);
+			try {
+				await addNewItemToShoppingList(shoppingListId, item);
+			} catch {}
+			expect(mockedError).toHaveBeenCalledWith({
+				message: 'Unable to add item to shopping list',
+				description: 'Shopping list does not exist',
+				shoppingListId,
+				item,
+			});
+		});
+		it('throws error from updateItemInShoppingList', async () => {
+			mockedFindShoppingListById.mockResolvedValueOnce({
+				id: shoppingListId,
+				items: [{ id: '635c712a6ad5ada00ab564dc', ...item }],
+			});
+			mockedUpdateItemInShoppingList.mockRejectedValueOnce(new Error('boom'));
+			await expect(
+				addNewItemToShoppingList(shoppingListId, item)
+			).rejects.toThrowError('boom');
+		});
+		it('logs error from updateItemInShoppingList', async () => {
+			mockedFindShoppingListById.mockResolvedValueOnce({
+				id: shoppingListId,
+				items: [{ id: '635c712a6ad5ada00ab564dc', ...item }],
+			});
+			mockedUpdateItemInShoppingList.mockRejectedValueOnce(new Error('boom'));
+			try {
+				await addNewItemToShoppingList(shoppingListId, item);
+			} catch {}
+			expect(mockedError).toHaveBeenCalledWith({
+				message: 'Unable to add item to shopping list',
+				description: 'boom',
+				shoppingListId,
+				item,
+			});
+		});
+		it('calls updateItemInShoppingList with correct payload', async () => {
+			mockedFindShoppingListById.mockResolvedValueOnce({
+				id: shoppingListId,
+				items: [{ id: '635c712a6ad5ada00ab564dc', ...item }],
+			});
+			mockedUpdateItemInShoppingList.mockRejectedValueOnce(new Error('boom'));
+			try {
+				await addNewItemToShoppingList(shoppingListId, item);
+			} catch {}
+			expect(mockedUpdateItemInShoppingList).toHaveBeenCalledWith(
+				shoppingListId,
+				{ ...item, id: '635c712a6ad5ada00ab564dc', quantity: 2 }
+			);
+		});
+		it('throws error because updateItemInShoppingList returns null', async () => {
+			mockedFindShoppingListById.mockResolvedValueOnce({
+				id: shoppingListId,
+				items: [{ id: '635c712a6ad5ada00ab564dc', ...item }],
+			});
+			mockedUpdateItemInShoppingList.mockResolvedValueOnce(null);
+			await expect(
+				addNewItemToShoppingList(shoppingListId, item)
+			).rejects.toThrowError('Unable to add item to shopping list');
+		});
+		it('logs error because updateItemInShoppingList returns null', async () => {
+			mockedFindShoppingListById.mockResolvedValueOnce({
+				id: shoppingListId,
+				items: [{ id: '635c712a6ad5ada00ab564dc', ...item }],
+			});
+			mockedUpdateItemInShoppingList.mockResolvedValueOnce(null);
+			try {
+				await addNewItemToShoppingList(shoppingListId, item);
+			} catch {}
+			expect(mockedError).toHaveBeenCalledWith({
+				message: 'Unable to add item to shopping list',
+				description: 'Unable to add item to shopping list',
+				shoppingListId,
+				item,
+			});
+		});
+		it('returns correct result from updateItemInShoppingList', async () => {
+			mockedFindShoppingListById.mockResolvedValueOnce({
+				id: shoppingListId,
+				items: [{ id: '635c712a6ad5ada00ab564dc', ...item }],
+			});
+			mockedUpdateItemInShoppingList.mockResolvedValueOnce({
+				id: '635c712a6ad5ada00ab564dc',
+				...item,
+				quantity: 2,
+			});
+			const result = await addNewItemToShoppingList(shoppingListId, item);
+			expect(result).toStrictEqual({
+				id: '635c712a6ad5ada00ab564dc',
+				...item,
+				quantity: 2,
+			});
+		});
+		it('does not call addItemToShoppingList', async () => {
+			mockedFindShoppingListById.mockResolvedValueOnce({
+				id: shoppingListId,
+				items: [{ id: '635c712a6ad5ada00ab564dc', ...item }],
+			});
+			mockedUpdateItemInShoppingList.mockResolvedValueOnce(null);
+			try {
+				await addNewItemToShoppingList(shoppingListId, item);
+			} catch {}
+			expect(mockedAddItemToShoppingList).not.toHaveBeenCalled();
+		});
+		it('throws error from addItemToShoppingList', async () => {
+			mockedFindShoppingListById.mockResolvedValueOnce({
+				id: shoppingListId,
+				items: [],
+			});
+			mockedAddItemToShoppingList.mockRejectedValueOnce(new Error('boom'));
+			await expect(
+				addNewItemToShoppingList(shoppingListId, item)
+			).rejects.toThrowError('boom');
+		});
+		it('logs error from addItemToShoppingList', async () => {
+			mockedFindShoppingListById.mockResolvedValueOnce({
+				id: shoppingListId,
+				items: [],
+			});
+			mockedAddItemToShoppingList.mockRejectedValueOnce(new Error('boom'));
+			try {
+				await addNewItemToShoppingList(shoppingListId, item);
+			} catch {}
+			expect(mockedError).toHaveBeenCalledWith({
+				message: 'Unable to add item to shopping list',
+				description: 'boom',
+				shoppingListId,
+				item,
+			});
+		});
+		it('calls addItemToShoppingList with correct payload', async () => {
+			mockedFindShoppingListById.mockResolvedValueOnce({
+				id: shoppingListId,
+				items: [],
+			});
+			mockedAddItemToShoppingList.mockRejectedValueOnce(new Error('boom'));
+			try {
+				await addNewItemToShoppingList(shoppingListId, item);
+			} catch {}
+			expect(mockedAddItemToShoppingList).toHaveBeenCalledWith(
+				shoppingListId,
+				item
+			);
+		});
+		it('throws error because addItemToShoppingList returns null', async () => {
+			mockedFindShoppingListById.mockResolvedValueOnce({
+				id: shoppingListId,
+				items: [],
+			});
+			mockedAddItemToShoppingList.mockResolvedValueOnce(null);
+			await expect(
+				addNewItemToShoppingList(shoppingListId, item)
+			).rejects.toThrowError('Unable to add item to shopping list');
+		});
+		it('logs error because addItemToShoppingList returns null', async () => {
+			mockedFindShoppingListById.mockResolvedValueOnce({
+				id: shoppingListId,
+				items: [],
+			});
+			mockedAddItemToShoppingList.mockResolvedValueOnce(null);
+			try {
+				await addNewItemToShoppingList(shoppingListId, item);
+			} catch {}
+			expect(mockedError).toHaveBeenCalledWith({
+				message: 'Unable to add item to shopping list',
+				description: 'Unable to add item to shopping list',
+				shoppingListId,
+				item,
+			});
+		});
+		it('does not call updateItemInShoppingList', async () => {
+			mockedFindShoppingListById.mockResolvedValueOnce({
+				id: shoppingListId,
+				items: [],
+			});
+			mockedAddItemToShoppingList.mockResolvedValueOnce(null);
+			try {
+				await addNewItemToShoppingList(shoppingListId, item);
+			} catch {}
+			expect(mockedUpdateItemInShoppingList).not.toHaveBeenCalled();
+		});
+		it('returns correct result from addItemToShoppingList', async () => {
+			mockedFindShoppingListById.mockResolvedValueOnce({
+				id: shoppingListId,
+				items: [],
+			});
+			mockedAddItemToShoppingList.mockResolvedValueOnce({
+				id: '635c712a6ad5ada00ab564dc',
+				...item,
+			});
+			const result = await addNewItemToShoppingList(shoppingListId, item);
+			expect(result).toStrictEqual({
+				id: '635c712a6ad5ada00ab564dc',
+				...item,
 			});
 		});
 	});

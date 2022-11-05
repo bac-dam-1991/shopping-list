@@ -1,7 +1,7 @@
 import { DuplicationError } from '../custom-errors/DuplicationError';
 import { ResourceDoesNotExistError } from '../custom-errors/ResourceDoesNotExistError';
 import { UpdateError } from '../custom-errors/UpdateError';
-import { WithId, WithOptionalId } from '../repositories/adapters/mongo';
+import { WithId } from '../repositories/adapters/mongo';
 import {
 	ShoppingList,
 	findShoppingListById,
@@ -11,6 +11,7 @@ import {
 	deleteShoppingListById,
 	ShoppingItem,
 	addItemToShoppingList,
+	updateItemInShoppingList,
 } from '../repositories/shopping-lists';
 
 /**
@@ -132,40 +133,41 @@ export const deleteShoppingList = async (
  * Add a shopping item to the shopping list
  * If adding item to shopping list is not successful, an error is thrown
  * If the an item with the same name already exists, add the quantities together
- * @param {string} id - The shopping list Id
+ * @param {string} shoppingListId - The shopping list Id
  * @param {ShoppingItem} item - The new shopping item
  * @returns {Promise<WithId<ShoppingItem>>} The updated shopping item
  */
 export const addNewItemToShoppingList = async (
-	id: string,
+	shoppingListId: string,
 	item: ShoppingItem
 ): Promise<WithId<ShoppingItem>> => {
 	try {
-		const shoppingList = await findShoppingListById(id);
+		const shoppingList = await findShoppingListById(shoppingListId);
 		if (!shoppingList) {
 			throw new ResourceDoesNotExistError('Shopping list does not exist');
 		}
 		const sameItem = shoppingList.items.find((i) => i.name === item.name);
-		let itemToUpdate: WithOptionalId<ShoppingItem> = {
-			...item,
-		};
+		let result: null | WithId<ShoppingItem> = null;
 		if (sameItem) {
-			itemToUpdate = {
+			const itemToUpdate: WithId<ShoppingItem> = {
 				...sameItem,
-				...itemToUpdate,
-				quantity: itemToUpdate.quantity + sameItem.quantity,
+				...item,
+				quantity: item.quantity + sameItem.quantity,
 			};
+			result = await updateItemInShoppingList(shoppingListId, itemToUpdate);
+		} else {
+			result = await addItemToShoppingList(shoppingListId, item);
 		}
-		const result = await addItemToShoppingList(id, itemToUpdate);
 		if (!result) {
 			throw new UpdateError('Unable to add item to shopping list');
 		}
 		return result;
 	} catch (error) {
 		console.error({
-			message: 'Unable to delete shopping list',
+			message: 'Unable to add item to shopping list',
 			description: (error as Error).message,
-			id,
+			shoppingListId,
+			item,
 		});
 		throw error;
 	}
