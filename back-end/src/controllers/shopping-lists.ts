@@ -8,6 +8,7 @@ import {
 	addNewShoppingList,
 	deleteShoppingList,
 	getShoppingListById,
+	updateShoppingItem,
 	updateShoppingList,
 } from '../services/shopping-lists';
 const router = express.Router();
@@ -138,59 +139,14 @@ router.put('/:id/items/:itemId/update', async (req, res, next) => {
 	try {
 		const { id, itemId } = req.params;
 		const { name, quantity, unit, status } = req.body;
-		const db = await connectToMongo();
-		const collection = db.collection(ShoppingListCollection);
-		const pipeline = [
-			{
-				$match: {
-					_id: new ObjectId(id),
-				},
-			},
-			{
-				$unwind: {
-					path: '$items',
-					preserveNullAndEmptyArrays: false,
-				},
-			},
-			{
-				$replaceRoot: {
-					newRoot: '$items',
-				},
-			},
-			{
-				$match: {
-					id: itemId,
-				},
-			},
-		];
-
-		const cursor = await collection.aggregate(pipeline);
-		const docs = await cursor.toArray();
-		if (!docs.length) {
-			throw new UpdateError('Item does not exist in shopping list');
-		}
-		const itemToUpdate = docs[0];
-		const result = await collection.updateOne(
-			{
-				_id: new ObjectId(id),
-				'items.id': itemId,
-			},
-			{
-				$set: {
-					'items.$': {
-						id: itemId,
-						name: name || itemToUpdate.name,
-						quantity: quantity || itemToUpdate.quantity,
-						status: status || itemToUpdate.status,
-						unit: unit || itemToUpdate.unit,
-					},
-				},
-			}
-		);
-		if (!result.modifiedCount) {
-			throw new UpdateError('Unable to update item in shopping list');
-		}
-		res.status(200).json(itemId);
+		const result = await updateShoppingItem(id, {
+			id: itemId,
+			name,
+			quantity,
+			unit,
+			status,
+		});
+		res.status(200).json(result);
 	} catch (error) {
 		next(error);
 	}

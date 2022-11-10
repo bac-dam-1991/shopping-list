@@ -12,6 +12,7 @@ import {
 	ShoppingItem,
 	addItemToShoppingList,
 	updateItemInShoppingList,
+	getItemInShoppingList,
 } from '../repositories/shopping-lists';
 
 /**
@@ -165,6 +166,51 @@ export const addNewItemToShoppingList = async (
 	} catch (error) {
 		console.error({
 			message: 'Unable to add item to shopping list',
+			description: (error as Error).message,
+			shoppingListId,
+			item,
+		});
+		throw error;
+	}
+};
+
+/**
+ * Update item in shopping list
+ * An error is thrown is item cannot be found in shopping list
+ * @param {string} shoppingListId - The shopping list Id
+ * @param {WithId<Partial<ShoppingItem>>} item - The new values for the shopping item
+ * @returns {Promise<WithId<ShoppingItem>>} The updated item
+ */
+export const updateShoppingItem = async (
+	shoppingListId: string,
+	item: WithId<Partial<ShoppingItem>>
+): Promise<WithId<ShoppingItem>> => {
+	try {
+		const { id, quantity, name, unit, status } = item;
+		const shoppingItem = await getItemInShoppingList({
+			shoppingListId,
+			itemId: id,
+		});
+		if (!shoppingItem) {
+			throw new ResourceDoesNotExistError(
+				'Item does not exist in shopping list'
+			);
+		}
+		const itemToUpdate = {
+			id,
+			name: name || shoppingItem.name,
+			quantity: quantity || shoppingItem.quantity,
+			status: status || shoppingItem.status,
+			unit: unit || shoppingItem.unit,
+		};
+		const result = await updateItemInShoppingList(shoppingListId, itemToUpdate);
+		if (!result) {
+			throw new UpdateError('Unable to update item');
+		}
+		return result;
+	} catch (error) {
+		console.error({
+			message: 'Unable to update item in shopping list',
 			description: (error as Error).message,
 			shoppingListId,
 			item,

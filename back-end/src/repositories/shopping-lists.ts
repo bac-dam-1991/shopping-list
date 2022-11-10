@@ -1,5 +1,6 @@
 import { ObjectId } from 'mongodb';
 import {
+	aggregate,
 	find,
 	findOne,
 	findOneAndDelete,
@@ -222,6 +223,61 @@ export const updateItemInShoppingList = async (
 			description: (error as Error).message,
 			shoppingListId,
 			shoppingItem,
+		});
+		throw error;
+	}
+};
+
+/**
+ * Get item in shopping list
+ * `null` is returned when there is not exactly one document
+ * for the item in the shopping list
+ * @param {string} payload.shoppingListId - The id of the shopping list
+ * @param {string} payload.itemId - The id of the item in the shopping list
+ * @returns {Promise<WithId<ShoppingItem> | null>} The shopping item
+ */
+export const getItemInShoppingList = async (payload: {
+	shoppingListId: string;
+	itemId: string;
+}): Promise<WithId<ShoppingItem> | null> => {
+	const { shoppingListId, itemId } = payload;
+	try {
+		const pipeline = [
+			{
+				$match: {
+					_id: new ObjectId(shoppingListId),
+				},
+			},
+			{
+				$unwind: {
+					path: '$items',
+					preserveNullAndEmptyArrays: false,
+				},
+			},
+			{
+				$replaceRoot: {
+					newRoot: '$items',
+				},
+			},
+			{
+				$match: {
+					id: itemId,
+				},
+			},
+		];
+		const items = await aggregate<ShoppingItem>(
+			ShoppingListCollection,
+			pipeline
+		);
+		if (items.length !== 1) {
+			return null;
+		}
+		return items[0];
+	} catch (error) {
+		console.error({
+			message: 'Unable to get item in shopping list',
+			description: (error as Error).message,
+			payload,
 		});
 		throw error;
 	}

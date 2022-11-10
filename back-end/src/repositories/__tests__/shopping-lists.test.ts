@@ -4,6 +4,7 @@ const mockedInsertOne = jest.fn();
 const mockedFindOneAndUpdate = jest.fn();
 const mockedFindOneAndDelete = jest.fn();
 const mockedUpdateOne = jest.fn();
+const mockedAggregate = jest.fn();
 jest.mock('../adapters/mongo', () => {
 	return {
 		find: mockedFind,
@@ -12,6 +13,7 @@ jest.mock('../adapters/mongo', () => {
 		findOneAndUpdate: mockedFindOneAndUpdate,
 		findOneAndDelete: mockedFindOneAndDelete,
 		updateOne: mockedUpdateOne,
+		aggregate: mockedAggregate,
 	};
 });
 
@@ -21,6 +23,7 @@ import {
 	findAllShoppingLists,
 	findShoppingListById,
 	findShoppingListsByName,
+	getItemInShoppingList,
 	insertNewShoppingList,
 	ShoppingItem,
 	updateItemInShoppingList,
@@ -364,6 +367,85 @@ describe('shopping lists repository functions', () => {
 				shoppingListId,
 				shoppingItem
 			);
+			expect(result).toStrictEqual(shoppingItem);
+		});
+	});
+
+	describe('getItemInShoppingList', () => {
+		const shoppingListId = '635a732b98ca699215c94708';
+		const itemId = '635e68f7da7f6722c6441104';
+		it('throws error from aggregate', async () => {
+			mockedAggregate.mockRejectedValueOnce(new Error('boom'));
+			await expect(
+				getItemInShoppingList({ shoppingListId, itemId })
+			).rejects.toThrowError('boom');
+		});
+		it('logs error from aggregate', async () => {
+			mockedAggregate.mockRejectedValueOnce(new Error('boom'));
+			try {
+				await getItemInShoppingList({ shoppingListId, itemId });
+			} catch {}
+			expect(mockedError).toHaveBeenCalledWith({
+				message: 'Unable to get item in shopping list',
+				description: 'boom',
+				payload: { shoppingListId, itemId },
+			});
+		});
+		+it('logs error from aggregate', async () => {
+			mockedAggregate.mockRejectedValueOnce(new Error('boom'));
+			try {
+				await getItemInShoppingList({ shoppingListId, itemId });
+			} catch {}
+			expect(mockedError).toHaveBeenCalledWith({
+				message: 'Unable to get item in shopping list',
+				description: 'boom',
+				payload: { shoppingListId, itemId },
+			});
+		});
+		it('calls aggregate with correct payload', async () => {
+			mockedAggregate.mockRejectedValueOnce(new Error('boom'));
+			try {
+				await getItemInShoppingList({ shoppingListId, itemId });
+			} catch {}
+			expect(mockedAggregate).toHaveBeenCalledWith('shopping-lists', [
+				{
+					$match: {
+						_id: new ObjectId(shoppingListId),
+					},
+				},
+				{
+					$unwind: {
+						path: '$items',
+						preserveNullAndEmptyArrays: false,
+					},
+				},
+				{
+					$replaceRoot: {
+						newRoot: '$items',
+					},
+				},
+				{
+					$match: {
+						id: itemId,
+					},
+				},
+			]);
+		});
+		it('returns null because there is no matching item in shopping list', async () => {
+			mockedAggregate.mockResolvedValueOnce([]);
+			const result = await getItemInShoppingList({ shoppingListId, itemId });
+			expect(result).toBeNull();
+		});
+		it('returns matching item in shopping list', async () => {
+			const shoppingItem: WithId<ShoppingItem> = {
+				id: '635e68f7da7f6722c6441104',
+				name: 'Test Item',
+				quantity: 1,
+				unit: 'test',
+				status: 'New',
+			};
+			mockedAggregate.mockResolvedValueOnce([shoppingItem]);
+			const result = await getItemInShoppingList({ shoppingListId, itemId });
 			expect(result).toStrictEqual(shoppingItem);
 		});
 	});

@@ -4,6 +4,7 @@ import {
 	Document,
 	FindOptions,
 	UpdateFilter,
+	AggregateOptions,
 } from 'mongodb';
 export type WithId<T> = T & { id: string };
 export type WithOptionalId<T> = T & { id?: string };
@@ -211,6 +212,36 @@ export const updateOne = async (
 			description: (error as Error).message,
 			filter,
 			update,
+		});
+		throw error;
+	}
+};
+
+/**
+ * Wrapper around MongoDB's `aggregate` function.
+ * It abstracts away the connection to MongoDB.
+ * @param {string} collectionName - The collection name
+ * @param {Document[]} pipeline - The aggregation pipeline
+ * @param {AggregateOptions} options - The aggregate options
+ * @returns {Promise<WithId<T>[]>} The documents
+ */
+export const aggregate = async <T extends Document = Document>(
+	collectionName: string,
+	pipeline: Document[],
+	options?: AggregateOptions
+): Promise<WithId<T>[]> => {
+	try {
+		const db = await connectToMongo();
+		const collection = db.collection(collectionName);
+		const cursor = await collection.aggregate(pipeline, options);
+		const docs = await cursor.toArray();
+		return docs as WithId<T>[];
+	} catch (error) {
+		console.error({
+			message: 'Unable to aggregate',
+			description: (error as Error).message,
+			pipeline,
+			options,
 		});
 		throw error;
 	}
