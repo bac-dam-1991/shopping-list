@@ -25,6 +25,7 @@ import {
 	findShoppingListsByName,
 	getItemInShoppingList,
 	insertNewShoppingList,
+	pullItemFromShoppingList,
 	ShoppingItem,
 	updateItemInShoppingList,
 	updateShoppingListById,
@@ -446,6 +447,130 @@ describe('shopping lists repository functions', () => {
 			};
 			mockedAggregate.mockResolvedValueOnce([shoppingItem]);
 			const result = await getItemInShoppingList({ shoppingListId, itemId });
+			expect(result).toStrictEqual(shoppingItem);
+		});
+	});
+
+	describe('pullItemFromShoppingList', () => {
+		const shoppingListId = '63552a5d00ca2e59a40c1f53';
+		const shoppingItem = {
+			id: '635c712a6ad5ada00ab564dc',
+			name: 'bananas',
+			status: 'New',
+			quantity: 8,
+			unit: 'piece',
+		};
+		it('throws error from updateOne', async () => {
+			mockedUpdateOne.mockRejectedValueOnce(new Error('boom'));
+			await expect(
+				pullItemFromShoppingList(shoppingListId, shoppingItem)
+			).rejects.toThrowError('boom');
+		});
+		it('logs error from updateOne', async () => {
+			mockedUpdateOne.mockRejectedValueOnce(new Error('boom'));
+			try {
+				await pullItemFromShoppingList(shoppingListId, shoppingItem);
+			} catch {}
+			expect(mockedError).toHaveBeenCalledWith({
+				message: 'Unable to update item in shopping list',
+				description: 'boom',
+				shoppingListId,
+				shoppingItem,
+			});
+		});
+		it('calls updateOne with correct payload', async () => {
+			mockedUpdateOne.mockRejectedValueOnce(new Error('boom'));
+			try {
+				await pullItemFromShoppingList(shoppingListId, shoppingItem);
+			} catch {}
+			expect(mockedUpdateOne).toHaveBeenCalledWith(
+				'shopping-lists',
+				{
+					_id: new ObjectId(shoppingListId),
+				},
+				{
+					$pull: {
+						items: shoppingItem,
+					},
+				}
+			);
+		});
+		it('returns null because result is false', async () => {
+			mockedUpdateOne.mockResolvedValueOnce(false);
+			const result = await pullItemFromShoppingList(
+				shoppingListId,
+				shoppingItem
+			);
+			expect(result).toBeNull();
+		});
+		it('returns shopping item because result is true', async () => {
+			mockedUpdateOne.mockResolvedValueOnce(true);
+			const result = await pullItemFromShoppingList(
+				shoppingListId,
+				shoppingItem
+			);
+			expect(result).toStrictEqual(shoppingItem);
+		});
+	});
+
+	describe('pullItemFromShoppingList', () => {
+		const shoppingListId = '63552a5d00ca2e59a40c1f53';
+		const shoppingItem: WithId<ShoppingItem> = {
+			id: '635c712a6ad5ada00ab564dc',
+			name: 'Apples',
+			quantity: 1,
+			status: 'New',
+			unit: 'piece',
+		};
+		it('throws error from updateOne', async () => {
+			mockedUpdateOne.mockRejectedValueOnce(new Error('boom'));
+			await expect(
+				pullItemFromShoppingList(shoppingListId, shoppingItem)
+			).rejects.toThrowError('boom');
+		});
+		it('logs error from updateOne', async () => {
+			mockedUpdateOne.mockRejectedValueOnce(new Error('boom'));
+			try {
+				await pullItemFromShoppingList(shoppingListId, shoppingItem);
+			} catch {}
+			expect(mockedError).toHaveBeenCalledWith({
+				message: 'Unable to update item in shopping list',
+				description: 'boom',
+				shoppingListId,
+				shoppingItem,
+			});
+		});
+		it('calls updateOne with correct payload', async () => {
+			mockedUpdateOne.mockRejectedValueOnce(new Error('boom'));
+			try {
+				await pullItemFromShoppingList(shoppingListId, shoppingItem);
+			} catch {}
+			expect(mockedUpdateOne).toHaveBeenCalledWith(
+				'shopping-lists',
+				{
+					_id: new ObjectId(shoppingListId),
+				},
+				{
+					$pull: {
+						items: shoppingItem,
+					},
+				}
+			);
+		});
+		it('returns null because result is false', async () => {
+			mockedUpdateOne.mockResolvedValueOnce(false);
+			const result = await pullItemFromShoppingList(
+				shoppingListId,
+				shoppingItem
+			);
+			expect(result).toBeNull();
+		});
+		it('returns deleted shopping item because result is true', async () => {
+			mockedUpdateOne.mockResolvedValueOnce(true);
+			const result = await pullItemFromShoppingList(
+				shoppingListId,
+				shoppingItem
+			);
 			expect(result).toStrictEqual(shoppingItem);
 		});
 	});

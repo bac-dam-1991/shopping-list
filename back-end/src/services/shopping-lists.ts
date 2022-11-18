@@ -1,7 +1,7 @@
 import { DuplicationError } from '../custom-errors/DuplicationError';
 import { ResourceDoesNotExistError } from '../custom-errors/ResourceDoesNotExistError';
 import { UpdateError } from '../custom-errors/UpdateError';
-import { WithId } from '../repositories/adapters/mongo';
+import { updateOne, WithId } from '../repositories/adapters/mongo';
 import {
 	ShoppingList,
 	findShoppingListById,
@@ -13,6 +13,7 @@ import {
 	addItemToShoppingList,
 	updateItemInShoppingList,
 	getItemInShoppingList,
+	pullItemFromShoppingList,
 } from '../repositories/shopping-lists';
 
 /**
@@ -214,6 +215,45 @@ export const updateShoppingItem = async (
 			description: (error as Error).message,
 			shoppingListId,
 			item,
+		});
+		throw error;
+	}
+};
+
+/**
+ * Remove item from shopping list
+ * It checks if the item exists in the shopping list.
+ * If the item exists, then it is removed.
+ * Else an error is thrown.
+ * @param {string} shoppingListId - The shopping list Id
+ * @param {string} itemId - The item Id
+ * @returns {Promise<WithId<ShoppingItem>>} The shopping item if successfully removed.
+ */
+export const removeItemFromShoppingList = async (
+	shoppingListId: string,
+	itemId: string
+): Promise<WithId<ShoppingItem>> => {
+	try {
+		const shoppingItem = await getItemInShoppingList({
+			shoppingListId,
+			itemId,
+		});
+		if (!shoppingItem) {
+			throw new ResourceDoesNotExistError(
+				'Item does not exist in shopping list'
+			);
+		}
+		const result = await pullItemFromShoppingList(shoppingListId, shoppingItem);
+		if (!result) {
+			throw new UpdateError('Unable to update item');
+		}
+		return result;
+	} catch (error) {
+		console.error({
+			message: 'Unable to remove item from shopping list',
+			description: (error as Error).message,
+			shoppingListId,
+			itemId,
 		});
 		throw error;
 	}

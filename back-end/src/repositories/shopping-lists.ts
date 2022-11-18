@@ -282,3 +282,41 @@ export const getItemInShoppingList = async (payload: {
 		throw error;
 	}
 };
+
+/**
+ * Remove an item from the shopping list
+ * by updating the shopping list's items array
+ * @param {string} shoppingListId - The Id of the shopping list
+ * @param {WithId<ShoppingItem>} shoppingItem - The shopping item to update
+ * @returns {Promise<WithId<ShoppingItem> | null>} The updated shopping item
+ */
+export const pullItemFromShoppingList = async (
+	shoppingListId: string,
+	shoppingItem: WithId<ShoppingItem>
+): Promise<WithId<ShoppingItem> | null> => {
+	try {
+		const result = await updateOne(
+			ShoppingListCollection,
+			{
+				_id: new ObjectId(shoppingListId),
+			},
+			{
+				$pull: {
+					items: shoppingItem,
+				},
+			}
+		);
+		if (!result) {
+			return null;
+		}
+		return shoppingItem;
+	} catch (error) {
+		console.error({
+			message: 'Unable to update item in shopping list',
+			description: (error as Error).message,
+			shoppingListId,
+			shoppingItem,
+		});
+		throw error;
+	}
+};

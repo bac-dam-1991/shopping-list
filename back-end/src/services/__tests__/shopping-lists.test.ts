@@ -6,6 +6,7 @@ const mockedDeleteShoppingListById = jest.fn();
 const mockedUpdateItemInShoppingList = jest.fn();
 const mockedAddItemToShoppingList = jest.fn();
 const mockedGetItemInShoppingList = jest.fn();
+const mockedPullItemFromShoppingList = jest.fn();
 jest.mock('../../repositories/shopping-lists', () => {
 	return {
 		findShoppingListById: mockedFindShoppingListById,
@@ -16,6 +17,7 @@ jest.mock('../../repositories/shopping-lists', () => {
 		updateItemInShoppingList: mockedUpdateItemInShoppingList,
 		addItemToShoppingList: mockedAddItemToShoppingList,
 		getItemInShoppingList: mockedGetItemInShoppingList,
+		pullItemFromShoppingList: mockedPullItemFromShoppingList,
 	};
 });
 
@@ -27,6 +29,7 @@ import {
 	addNewShoppingList,
 	deleteShoppingList,
 	getShoppingListById,
+	removeItemFromShoppingList,
 	updateShoppingItem,
 	updateShoppingList,
 } from '../shopping-lists';
@@ -699,6 +702,122 @@ describe('Shopping lists service functions', () => {
 				quantity: 2,
 			});
 			expect(result).toStrictEqual(item);
+		});
+	});
+
+	describe('removeItemFromShoppingList', () => {
+		const shoppingListId = '63552a5d00ca2e59a40c1f53';
+		const itemId = '635c712a6ad5ada00ab564dc';
+		const shoppingItem: WithId<ShoppingItem> = {
+			id: '635c712a6ad5ada00ab564dc',
+			name: 'Apples',
+			quantity: 1,
+			status: 'New',
+			unit: 'piece',
+		};
+
+		it('throws error from getItemInShoppingList', async () => {
+			mockedGetItemInShoppingList.mockRejectedValueOnce(new Error('boom'));
+			await expect(
+				removeItemFromShoppingList(shoppingListId, itemId)
+			).rejects.toThrowError('boom');
+		});
+		it('logs error from getItemInShoppingList', async () => {
+			mockedGetItemInShoppingList.mockRejectedValueOnce(new Error('boom'));
+			try {
+				await removeItemFromShoppingList(shoppingListId, itemId);
+			} catch {}
+			expect(mockedError).toHaveBeenCalledWith({
+				message: 'Unable to remove item from shopping list',
+				description: 'boom',
+				shoppingListId,
+				itemId,
+			});
+		});
+		it('calls getItemInShoppingList with correct payload', async () => {
+			mockedGetItemInShoppingList.mockRejectedValueOnce(new Error('boom'));
+			try {
+				await removeItemFromShoppingList(shoppingListId, itemId);
+			} catch {}
+			expect(mockedGetItemInShoppingList).toHaveBeenCalledWith({
+				shoppingListId,
+				itemId,
+			});
+		});
+		it('throws error because shopping item is null', async () => {
+			mockedGetItemInShoppingList.mockResolvedValueOnce(null);
+			await expect(
+				removeItemFromShoppingList(shoppingListId, itemId)
+			).rejects.toThrowError('Item does not exist in shopping list');
+		});
+		it('logs error because shopping item is null', async () => {
+			mockedGetItemInShoppingList.mockResolvedValueOnce(null);
+			try {
+				await removeItemFromShoppingList(shoppingListId, itemId);
+			} catch {}
+			expect(mockedError).toHaveBeenCalledWith({
+				message: 'Unable to remove item from shopping list',
+				description: 'Item does not exist in shopping list',
+				shoppingListId,
+				itemId,
+			});
+		});
+		it('throws error from pullItemFromShoppingList', async () => {
+			mockedGetItemInShoppingList.mockResolvedValueOnce(shoppingItem);
+			mockedPullItemFromShoppingList.mockRejectedValueOnce(new Error('boom'));
+			await expect(
+				removeItemFromShoppingList(shoppingListId, itemId)
+			).rejects.toThrowError('boom');
+		});
+		it('logs error from pullItemFromShoppingList', async () => {
+			mockedGetItemInShoppingList.mockResolvedValueOnce(shoppingItem);
+			mockedPullItemFromShoppingList.mockRejectedValueOnce(new Error('boom'));
+			try {
+				await removeItemFromShoppingList(shoppingListId, itemId);
+			} catch {}
+			expect(mockedError).toHaveBeenCalledWith({
+				message: 'Unable to remove item from shopping list',
+				description: 'boom',
+				shoppingListId,
+				itemId,
+			});
+		});
+		it('calls pullItemFromShoppingList with correct payload', async () => {
+			mockedGetItemInShoppingList.mockResolvedValueOnce(shoppingItem);
+			mockedPullItemFromShoppingList.mockRejectedValueOnce(new Error('boom'));
+			try {
+				await removeItemFromShoppingList(shoppingListId, itemId);
+			} catch {}
+			expect(mockedPullItemFromShoppingList).toHaveBeenCalledWith(
+				shoppingListId,
+				shoppingItem
+			);
+		});
+		it('throws error because deleted shopping item is null', async () => {
+			mockedGetItemInShoppingList.mockResolvedValueOnce(shoppingItem);
+			mockedPullItemFromShoppingList.mockResolvedValueOnce(null);
+			await expect(
+				removeItemFromShoppingList(shoppingListId, itemId)
+			).rejects.toThrowError('Unable to update item');
+		});
+		it('logs error because deleted shopping item is null', async () => {
+			mockedGetItemInShoppingList.mockResolvedValueOnce(shoppingItem);
+			mockedPullItemFromShoppingList.mockResolvedValueOnce(null);
+			try {
+				await removeItemFromShoppingList(shoppingListId, itemId);
+			} catch {}
+			expect(mockedError).toHaveBeenCalledWith({
+				message: 'Unable to remove item from shopping list',
+				description: 'Unable to update item',
+				shoppingListId,
+				itemId,
+			});
+		});
+		it('returns deleted shopping item', async () => {
+			mockedGetItemInShoppingList.mockResolvedValueOnce(shoppingItem);
+			mockedPullItemFromShoppingList.mockResolvedValueOnce(shoppingItem);
+			const result = await removeItemFromShoppingList(shoppingListId, itemId);
+			expect(result).toStrictEqual(shoppingItem);
 		});
 	});
 });
