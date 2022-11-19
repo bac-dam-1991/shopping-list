@@ -1,5 +1,11 @@
 import { updateShoppingListApi } from '../apis/shopping-lists';
-import { ShoppingListForm, ShoppingListFormFields } from './ShoppingListForm';
+import {
+	ShoppingListForm,
+	ShoppingListFormFields,
+	ShoppingListFormId,
+} from './ShoppingListForm';
+
+export const UpdateShoppingListFormId = `update-${ShoppingListFormId}`;
 
 export interface UpdateShoppingListFormFields extends ShoppingListFormFields {}
 
@@ -22,5 +28,11 @@ export const UpdateShoppingListForm = ({
 		closeForm();
 	};
 
-	return <ShoppingListForm submitForm={onSubmit} defaultValues={data} />;
+	return (
+		<ShoppingListForm
+			submitForm={onSubmit}
+			defaultValues={data}
+			formId={UpdateShoppingListFormId}
+		/>
+	);
 };

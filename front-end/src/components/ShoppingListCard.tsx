@@ -2,11 +2,12 @@ import DeleteForeverRoundedIcon from '@mui/icons-material/DeleteForeverRounded';
 import EditRoundedIcon from '@mui/icons-material/EditRounded';
 import { UpdateShoppingListForm } from '../forms/UpdateShoppingListForm';
 import CancelRoundedIcon from '@mui/icons-material/CancelRounded';
-import { Typography, Stack, Paper, IconButton } from '@mui/material';
+import { Typography, Stack, Paper, IconButton, Button } from '@mui/material';
 import { deleteShoppingListApi, ShoppingList } from '../apis/shopping-lists';
 import { useState } from 'react';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import { useNavigate } from 'react-router-dom';
+import { UpdateShoppingItemFormId } from '../forms/UpdateShoppingItemForm';
 
 export interface ShoppingListCardProps {
 	data: ShoppingList;
@@ -66,12 +67,17 @@ export const ShoppingListCard = ({
 					</Stack>
 				</Stack>
 				{isUpdating && (
-					<UpdateShoppingListForm
-						closeForm={handleCancelUpdate}
-						refetch={onRefetch}
-						data={{ name: data.name }}
-						id={data.id}
-					/>
+					<Stack spacing={2}>
+						<UpdateShoppingListForm
+							closeForm={handleCancelUpdate}
+							refetch={onRefetch}
+							data={{ name: data.name }}
+							id={data.id}
+						/>
+						<Button variant="contained" form={UpdateShoppingItemFormId}>
+							Update
+						</Button>
+					</Stack>
 				)}
 			</Stack>
 		</Paper>

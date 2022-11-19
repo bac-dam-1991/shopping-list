@@ -1,10 +1,20 @@
 import DeleteForeverRoundedIcon from '@mui/icons-material/DeleteForeverRounded';
 import EditRoundedIcon from '@mui/icons-material/EditRounded';
 import CancelRoundedIcon from '@mui/icons-material/CancelRounded';
-import { Typography, Stack, Paper, IconButton, Chip } from '@mui/material';
+import {
+	Typography,
+	Stack,
+	Paper,
+	IconButton,
+	Chip,
+	Button,
+} from '@mui/material';
 import { removeShoppingItemApi, ShoppingItem } from '../apis/shopping-lists';
 import { useState } from 'react';
-import { UpdateShoppingItemForm } from '../forms/UpdateShoppingItemForm';
+import {
+	UpdateShoppingItemForm,
+	UpdateShoppingItemFormId,
+} from '../forms/UpdateShoppingItemForm';
 
 export interface ShoppingItemCardProps {
 	data: ShoppingItem;
@@ -72,12 +82,22 @@ export const ShoppingItemCard = ({
 					</Stack>
 				</Stack>
 				{isUpdating && (
-					<UpdateShoppingItemForm
-						shoppingListId={shoppingListId}
-						data={data}
-						refetch={onRefetch}
-						closeForm={() => setIsUpdating(false)}
-					/>
+					<Stack spacing={2}>
+						<UpdateShoppingItemForm
+							shoppingListId={shoppingListId}
+							itemId={data.id}
+							data={data}
+							refetch={onRefetch}
+							closeForm={() => setIsUpdating(false)}
+						/>
+						<Button
+							variant="contained"
+							type="submit"
+							form={UpdateShoppingItemFormId}
+						>
+							Update
+						</Button>
+					</Stack>
 				)}
 			</Stack>
 		</Paper>

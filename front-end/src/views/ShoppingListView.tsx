@@ -1,8 +1,11 @@
-import { Container, Stack, Typography } from '@mui/material';
+import { Button, Container, Stack, Typography } from '@mui/material';
 import { useParams } from 'react-router-dom';
 import { useCallback, useEffect, useState } from 'react';
 import { getShoppingListByIdApi, ShoppingList } from '../apis/shopping-lists';
-import { NewShoppingItemForm } from '../forms/NewShoppingItemForm';
+import {
+	NewShoppingItemForm,
+	NewShoppingItemFormId,
+} from '../forms/NewShoppingItemForm';
 import { ShoppingItemCard } from '../components/ShoppingItemCard';
 
 export const ShoppingListView = () => {
@@ -31,10 +34,19 @@ export const ShoppingListView = () => {
 					<Typography>Loading shopping list</Typography>
 				)}
 				{id && (
-					<NewShoppingItemForm
-						refetch={getShoppingListById}
-						shoppingListId={id}
-					/>
+					<Stack spacing={2}>
+						<NewShoppingItemForm
+							refetch={getShoppingListById}
+							shoppingListId={id}
+						/>
+						<Button
+							variant="contained"
+							type="submit"
+							form={NewShoppingItemFormId}
+						>
+							Add
+						</Button>
+					</Stack>
 				)}
 				{shoppingList &&
 					shoppingList.items.map((item) => {

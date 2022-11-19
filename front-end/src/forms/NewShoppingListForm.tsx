@@ -1,5 +1,11 @@
 import { addNewShoppingListApi } from '../apis/shopping-lists';
-import { ShoppingListForm, ShoppingListFormFields } from './ShoppingListForm';
+import {
+	ShoppingListForm,
+	ShoppingListFormFields,
+	ShoppingListFormId,
+} from './ShoppingListForm';
+
+export const NewShoppingListFormId = `new-${ShoppingListFormId}`;
 
 export interface NewShoppingListFormFields extends ShoppingListFormFields {}
 export interface NewShoppingListFormProps {
@@ -12,5 +18,7 @@ export const NewShoppingListForm = ({ refetch }: NewShoppingListFormProps) => {
 		await refetch();
 	};
 
-	return <ShoppingListForm submitForm={onSubmit} />;
+	return (
+		<ShoppingListForm submitForm={onSubmit} formId={NewShoppingListFormId} />
+	);
 };
