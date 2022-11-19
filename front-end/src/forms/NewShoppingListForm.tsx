@@ -1,30 +1,29 @@
 import { Button, Stack, TextField } from '@mui/material';
-import { useState, ChangeEventHandler, FormEventHandler } from 'react';
+import { useForm } from 'react-hook-form';
 import { addNewShoppingListApi } from '../apis/shopping-lists';
 
+export interface NewShoppingListFormFields {
+	name: string;
+}
 export interface NewShoppingListFormProps {
 	refetch: () => Promise<void>;
 }
 
 export const NewShoppingListForm = ({ refetch }: NewShoppingListFormProps) => {
-	const [name, setName] = useState<string>('');
+	const { register, handleSubmit, reset } = useForm<NewShoppingListFormFields>({
+		defaultValues: { name: '' },
+	});
 
-	const submitForm: FormEventHandler = async (event) => {
-		event.preventDefault();
-		await addNewShoppingListApi({ name });
+	const onSubmit = async (formFields: NewShoppingListFormFields) => {
+		await addNewShoppingListApi(formFields);
 		await refetch();
-		setName('');
-	};
-
-	const handleNameChange: ChangeEventHandler<HTMLInputElement> = (event) => {
-		const val = event.target.value;
-		setName(val);
+		reset();
 	};
 
 	return (
-		<form onSubmit={submitForm}>
+		<form onSubmit={handleSubmit(onSubmit)}>
 			<Stack spacing={2}>
-				<TextField label="Name" value={name} onChange={handleNameChange} />
+				<TextField label="Name" {...register('name')} />
 				<Button variant="contained" type="submit">
 					Add
 				</Button>
