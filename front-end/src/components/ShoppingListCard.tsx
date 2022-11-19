@@ -69,7 +69,8 @@ export const ShoppingListCard = ({
 					<UpdateShoppingListForm
 						closeForm={handleCancelUpdate}
 						refetch={onRefetch}
-						data={data}
+						data={{ name: data.name }}
+						id={data.id}
 					/>
 				)}
 			</Stack>
