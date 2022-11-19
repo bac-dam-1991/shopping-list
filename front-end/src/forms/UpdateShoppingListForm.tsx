@@ -1,11 +1,16 @@
 import { Button, Stack, TextField } from '@mui/material';
-import { useState, ChangeEventHandler, FormEventHandler } from 'react';
-import { updateShoppingListApi, ShoppingList } from '../apis/shopping-lists';
+import { updateShoppingListApi } from '../apis/shopping-lists';
+import { useForm } from 'react-hook-form';
+
+export interface UpdateShoppingListFormFields {
+	id: string;
+	name: string;
+}
 
 export interface UpdateShoppingListFormProps {
 	refetch: () => Promise<void>;
 	closeForm: () => void;
-	data: ShoppingList;
+	data: UpdateShoppingListFormFields;
 }
 
 export const UpdateShoppingListForm = ({
@@ -13,30 +18,22 @@ export const UpdateShoppingListForm = ({
 	data,
 	closeForm,
 }: UpdateShoppingListFormProps) => {
-	const [name, setName] = useState<string>(data.name);
+	const { register, handleSubmit, reset } =
+		useForm<UpdateShoppingListFormFields>({
+			defaultValues: data,
+		});
 
-	const submitForm: FormEventHandler = async (event) => {
-		event.preventDefault();
-		await updateShoppingListApi(data.id, { name });
-		setName('');
+	const onSubmit = async (formFields: UpdateShoppingListFormFields) => {
+		await updateShoppingListApi(data.id, formFields);
 		await refetch();
+		reset();
 		closeForm();
 	};
 
-	const handleNameChange: ChangeEventHandler<HTMLInputElement> = (event) => {
-		const val = event.target.value;
-		setName(val);
-	};
-
 	return (
-		<form onSubmit={submitForm}>
+		<form onSubmit={handleSubmit(onSubmit)}>
 			<Stack spacing={2}>
-				<TextField
-					autoFocus
-					label="Name"
-					value={name}
-					onChange={handleNameChange}
-				/>
+				<TextField autoFocus label="Name" {...register('name')} />
 				<Button variant="outlined" type="submit">
 					Update
 				</Button>
