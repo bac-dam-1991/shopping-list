@@ -1,0 +1,10 @@
+{
+	"scripts": {
+		"start:fe": "cd ./front-end && npm start",
+		"start:be": "cd ./back-end && npm start",
+		"start": "concurrently \"yarn:start:*\""
+	},
+	"devDependencies": {
+		"concurrently": "^7.5.0"
+	}
+}
