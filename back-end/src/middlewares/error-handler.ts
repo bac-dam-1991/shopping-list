@@ -2,12 +2,17 @@ import { ErrorRequestHandler } from 'express';
 import { DuplicationError } from '../custom-errors/DuplicationError';
 import { ResourceDoesNotExistError } from '../custom-errors/ResourceDoesNotExistError';
 import { UpdateError } from '../custom-errors/UpdateError';
+import { ValidationError } from '../custom-errors/ValidationError';
 
 export const errorHandler: ErrorRequestHandler = (error, req, res, next) => {
 	console.error({
 		message: 'An error occurred',
 		description: (error as Error).message,
 	});
+	if (error instanceof ValidationError) {
+		res.status(409).json((error as Error).message);
+		return;
+	}
 	if (error instanceof UpdateError) {
 		res.status(400).json((error as Error).message);
 		return;

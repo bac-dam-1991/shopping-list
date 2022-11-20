@@ -1,7 +1,4 @@
 import express from 'express';
-import { ObjectId } from 'mongodb';
-import { UpdateError } from '../custom-errors/UpdateError';
-import { connectToMongo } from '../repositories/adapters/mongo';
 import { findAllShoppingLists } from '../repositories/shopping-lists';
 import {
 	addNewItemToShoppingList,
@@ -12,9 +9,9 @@ import {
 	updateShoppingItem,
 	updateShoppingList,
 } from '../services/shopping-lists';
+import Joi from 'joi';
+import { ValidationError } from '../custom-errors/ValidationError';
 const router = express.Router();
-
-const ShoppingListCollection = 'shopping-lists';
 
 router.get('', async (req, res, next) => {
 	try {
@@ -28,6 +25,13 @@ router.get('', async (req, res, next) => {
 router.get('/:id', async (req, res, next) => {
 	try {
 		const { id } = req.params;
+		const schema = Joi.string().length(24).messages({
+			'string.length': 'Shopping list Id needs to be {#limit} characters long.',
+		});
+		const { error } = schema.validate(id);
+		if (error) {
+			throw new ValidationError(error.details[0].message);
+		}
 		const shoppingList = await getShoppingListById(id);
 		res.status(200).json(shoppingList);
 	} catch (error) {
