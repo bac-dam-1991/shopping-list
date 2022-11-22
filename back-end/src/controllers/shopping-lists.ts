@@ -10,7 +10,7 @@ import {
 	updateShoppingList,
 } from '../services/shopping-lists';
 import Joi from 'joi';
-import { ValidationError } from '../custom-errors/ValidationError';
+import { validateAndThrowOnError } from './validation';
 const router = express.Router();
 
 router.get('', async (req, res, next) => {
@@ -28,10 +28,7 @@ router.get('/:id', async (req, res, next) => {
 		const schema = Joi.string().length(24).messages({
 			'string.length': 'Shopping list Id needs to be {#limit} characters long.',
 		});
-		const { error } = schema.validate(id);
-		if (error) {
-			throw new ValidationError(error.details[0].message);
-		}
+		validateAndThrowOnError(schema, id);
 		const shoppingList = await getShoppingListById(id);
 		res.status(200).json(shoppingList);
 	} catch (error) {
@@ -42,6 +39,14 @@ router.get('/:id', async (req, res, next) => {
 router.post('', async (req, res, next) => {
 	try {
 		const { name } = req.body;
+		const schema = Joi.string().min(3).max(50).required().messages({
+			'any.required': 'Shopping list name is required.',
+			'string.min':
+				'Shopping list name needs to be at least {#limit} characters long.',
+			'string.max':
+				'Shopping list name cannot be more than {#limit} characters long.',
+		});
+		validateAndThrowOnError(schema, name);
 		const shoppingList = await addNewShoppingList(name);
 		res.status(201).json(shoppingList);
 	} catch (error) {
