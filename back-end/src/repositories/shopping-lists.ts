@@ -12,6 +12,17 @@ import {
 
 const ShoppingListCollection = 'shopping-lists';
 
+export const Units = [
+	'piece(s)',
+	'kilogram(s)',
+	'litre(s)',
+	'box(es)',
+	'millilitre(s)',
+	'milligram(s)',
+	'carton(s)',
+	'bottle(s)',
+] as const;
+
 export interface ShoppingItem {
 	name: string;
 	unit: string;
