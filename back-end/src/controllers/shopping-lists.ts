@@ -12,6 +12,7 @@ import {
 import Joi from 'joi';
 import { validateAndThrowOnError } from './validation';
 import {
+	ItemIdSchema,
 	ItemNameSchema,
 	ItemQuantitySchema,
 	ItemStatusSchema,
@@ -117,6 +118,22 @@ router.put('/:id/items/:itemId/update', async (req, res, next) => {
 	try {
 		const { id, itemId } = req.params;
 		const { name, quantity, unit, status } = req.body;
+		const Schema = Joi.object().keys({
+			id: ShoppingListIdSchema,
+			itemId: ItemIdSchema,
+			name: ItemNameSchema.optional(),
+			status: ItemStatusSchema.optional(),
+			quantity: ItemQuantitySchema.optional(),
+			unit: ItemUnitSchema.optional(),
+		});
+		validateAndThrowOnError(Schema, {
+			id,
+			name,
+			status,
+			quantity,
+			unit,
+			itemId,
+		});
 		const result = await updateShoppingItem(id, {
 			id: itemId,
 			name,

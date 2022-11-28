@@ -1,8 +1,16 @@
 import Joi from 'joi';
 import { Units } from '../../repositories/shopping-lists';
 
-export const ShoppingListIdSchema = Joi.string().length(24).messages({
-	'string.length': 'Shopping list Id needs to be {#limit} characters long.',
+export const ShoppingListIdSchema = Joi.string()
+	.length(24)
+	.required()
+	.messages({
+		'string.length': 'Shopping list Id needs to be {#limit} characters long.',
+		'any.required': 'Shopping list Id is required.',
+	});
+export const ItemIdSchema = Joi.string().length(24).required().messages({
+	'string.length': 'Item Id needs to be {#limit} characters long.',
+	'any.required': 'Item Id is required.',
 });
 export const ShoppingListNameSchema = Joi.string()
 	.min(3)

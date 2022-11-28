@@ -3,6 +3,7 @@ const mockedAddNewShoppingList = jest.fn();
 const mockedUpdateShoppingList = jest.fn();
 const mockedDeleteShoppingList = jest.fn();
 const mockedAddNewItemToShoppingList = jest.fn();
+const mockedUpdateShoppingItem = jest.fn();
 jest.mock('../../services/shopping-lists', () => {
 	return {
 		getShoppingListById: mockedGetShoppingListById,
@@ -10,6 +11,7 @@ jest.mock('../../services/shopping-lists', () => {
 		updateShoppingList: mockedUpdateShoppingList,
 		deleteShoppingList: mockedDeleteShoppingList,
 		addNewItemToShoppingList: mockedAddNewItemToShoppingList,
+		updateShoppingItem: mockedUpdateShoppingItem,
 	};
 });
 
@@ -569,6 +571,219 @@ describe('controllers', () => {
 				status: 'New',
 				quantity: 1,
 				unit: 'piece(s)',
+			});
+		});
+	});
+
+	describe('udpate item in shopping list endpoint', () => {
+		const shoppingListId = '63552a5d00ca2e59a40c1f53';
+		const itemId = '638158f471f9fba20a671d27';
+		it('returns status 409 because shopping list Id is invalid', async () => {
+			const response = await agent.put(
+				`/api/v1/shopping-lists/123/items/${itemId}/update`
+			);
+			expect(response.status).toBe(409);
+		});
+
+		it('returns error message because shopping list Id is invalid', async () => {
+			const response = await agent.put(
+				`/api/v1/shopping-lists/123/items/${itemId}/update`
+			);
+			expect(response.body).toBe(
+				'Shopping list Id needs to be 24 characters long.'
+			);
+		});
+
+		it('logs error message because shopping list Id is invalid', async () => {
+			await agent.put(`/api/v1/shopping-lists/123/items/${itemId}/update`);
+			expect(mockedError).toHaveBeenCalledWith({
+				message: 'An error occurred',
+				description: 'Shopping list Id needs to be 24 characters long.',
+			});
+		});
+
+		it('returns status 409 because item Id is invalid', async () => {
+			const response = await agent.put(
+				`/api/v1/shopping-lists/${shoppingListId}/items/123/update`
+			);
+			expect(response.status).toBe(409);
+		});
+
+		it('returns error message because item Id is invalid', async () => {
+			const response = await agent.put(
+				`/api/v1/shopping-lists/${shoppingListId}/items/123/update`
+			);
+			expect(response.body).toBe('Item Id needs to be 24 characters long.');
+		});
+
+		it('logs error message because item Id is invalid', async () => {
+			await agent.put(
+				`/api/v1/shopping-lists/${shoppingListId}/items/123/update`
+			);
+			expect(mockedError).toHaveBeenCalledWith({
+				message: 'An error occurred',
+				description: 'Item Id needs to be 24 characters long.',
+			});
+		});
+
+		it('returns status 409 because item name is invalid', async () => {
+			const response = await agent
+				.put(`/api/v1/shopping-lists/${shoppingListId}/items/${itemId}/update`)
+				.send({ name: 'A' });
+			expect(response.status).toBe(409);
+		});
+
+		it('returns error message because item name is invalid', async () => {
+			const response = await agent
+				.put(`/api/v1/shopping-lists/${shoppingListId}/items/${itemId}/update`)
+				.send({ name: 'A' });
+			expect(response.body).toBe(
+				'Item name needs to be at least 3 characters long.'
+			);
+		});
+
+		it('logs error message because item name is invalid', async () => {
+			await agent
+				.put(`/api/v1/shopping-lists/${shoppingListId}/items/${itemId}/update`)
+				.send({ name: 'A' });
+			expect(mockedError).toHaveBeenCalledWith({
+				message: 'An error occurred',
+				description: 'Item name needs to be at least 3 characters long.',
+			});
+		});
+
+		it('returns status 409 because item status is invalid', async () => {
+			const response = await agent
+				.put(`/api/v1/shopping-lists/${shoppingListId}/items/${itemId}/update`)
+				.send({ status: 'Hello' });
+			expect(response.status).toBe(409);
+		});
+
+		it('returns error message because item status is invalid', async () => {
+			const response = await agent
+				.put(`/api/v1/shopping-lists/${shoppingListId}/items/${itemId}/update`)
+				.send({ status: 'Hello' });
+			expect(response.body).toBe(
+				'Invalid status. Valid statuses are [New, Updated, Purchased].'
+			);
+		});
+
+		it('logs error message because item status is invalid', async () => {
+			await agent
+				.put(`/api/v1/shopping-lists/${shoppingListId}/items/${itemId}/update`)
+				.send({ status: 'Hello' });
+			expect(mockedError).toHaveBeenCalledWith({
+				message: 'An error occurred',
+				description:
+					'Invalid status. Valid statuses are [New, Updated, Purchased].',
+			});
+		});
+
+		it('returns status 409 because quantity is invalid', async () => {
+			const response = await agent
+				.put(`/api/v1/shopping-lists/${shoppingListId}/items/${itemId}/update`)
+				.send({ quantity: -1 });
+			expect(response.status).toBe(409);
+		});
+
+		it('returns error message because quantity is invalid', async () => {
+			const response = await agent
+				.put(`/api/v1/shopping-lists/${shoppingListId}/items/${itemId}/update`)
+				.send({ quantity: -1 });
+			expect(response.body).toBe('Quantity cannot be less than 0.');
+		});
+
+		it('logs error message because quantity is invalid', async () => {
+			await agent
+				.put(`/api/v1/shopping-lists/${shoppingListId}/items/${itemId}/update`)
+				.send({ quantity: -1 });
+			expect(mockedError).toHaveBeenCalledWith({
+				message: 'An error occurred',
+				description: 'Quantity cannot be less than 0.',
+			});
+		});
+
+		it('returns status 409 because unit is invalid', async () => {
+			const response = await agent
+				.put(`/api/v1/shopping-lists/${shoppingListId}/items/${itemId}/update`)
+				.send({ unit: 'foo' });
+			expect(response.status).toBe(409);
+		});
+
+		it('returns error message because unit is invalid', async () => {
+			const response = await agent
+				.put(`/api/v1/shopping-lists/${shoppingListId}/items/${itemId}/update`)
+				.send({ unit: 'foo' });
+			expect(response.body).toBe(
+				'Invalid unit. Valid units are [piece(s), kilogram(s), litre(s), box(es), millilitre(s), milligram(s), carton(s), bottle(s)].'
+			);
+		});
+
+		it('logs error message because unit is invalid', async () => {
+			await agent
+				.put(`/api/v1/shopping-lists/${shoppingListId}/items/${itemId}/update`)
+				.send({ unit: 'foo' });
+			expect(mockedError).toHaveBeenCalledWith({
+				message: 'An error occurred',
+				description:
+					'Invalid unit. Valid units are [piece(s), kilogram(s), litre(s), box(es), millilitre(s), milligram(s), carton(s), bottle(s)].',
+			});
+		});
+
+		it('returns status code 500 because generic error is thrown from updateShoppingItem', async () => {
+			mockedUpdateShoppingItem.mockRejectedValueOnce(new Error('boom'));
+			const response = await agent
+				.put(`/api/v1/shopping-lists/${shoppingListId}/items/${itemId}/update`)
+				.send({
+					status: 'Purchased',
+				});
+			expect(response.status).toBe(500);
+		});
+
+		it('returns correct error message because generic error is thrown from updateShoppingItem', async () => {
+			mockedUpdateShoppingItem.mockRejectedValueOnce(new Error('boom'));
+			const response = await agent
+				.put(`/api/v1/shopping-lists/${shoppingListId}/items/${itemId}/update`)
+				.send({
+					status: 'Purchased',
+				});
+			expect(response.body).toBe('An unknown error has occurred.');
+		});
+
+		it('returns status code 200 when everything succeeds', async () => {
+			mockedUpdateShoppingItem.mockResolvedValueOnce({
+				id: '1',
+				name: 'Banana',
+				status: 'Purchased',
+				quantity: 1,
+				unit: 'piece(s)',
+			});
+			const response = await agent
+				.put(`/api/v1/shopping-lists/${shoppingListId}/items/${itemId}/update`)
+				.send({
+					status: 'Purchased',
+				});
+			expect(response.status).toBe(200);
+		});
+		it('returns newly updated shopping item', async () => {
+			mockedUpdateShoppingItem.mockResolvedValueOnce({
+				id: '1',
+				name: 'Banana',
+				status: 'Purchased',
+				quantity: 1,
+				unit: 'piece(s)',
+			});
+			const response = await agent
+				.put(`/api/v1/shopping-lists/${shoppingListId}/items/${itemId}/update`)
+				.send({
+					status: 'Purchased',
+				});
+			expect(response.body).toStrictEqual({
+				id: '1',
+				name: 'Banana',
+				quantity: 1,
+				unit: 'piece(s)',
+				status: 'Purchased',
 			});
 		});
 	});
