@@ -107,6 +107,11 @@ router.post('/:id/items/add', async (req, res, next) => {
 router.put('/:id/items/:itemId/delete', async (req, res, next) => {
 	try {
 		const { id, itemId } = req.params;
+		const Schema = Joi.object().keys({
+			id: ShoppingListIdSchema,
+			itemId: ItemIdSchema,
+		});
+		validateAndThrowOnError(Schema, { id, itemId });
 		const result = await removeItemFromShoppingList(id, itemId);
 		res.status(200).json(result);
 	} catch (error) {

@@ -4,6 +4,7 @@ const mockedUpdateShoppingList = jest.fn();
 const mockedDeleteShoppingList = jest.fn();
 const mockedAddNewItemToShoppingList = jest.fn();
 const mockedUpdateShoppingItem = jest.fn();
+const mockedRemoveItemFromShoppingList = jest.fn();
 jest.mock('../../services/shopping-lists', () => {
 	return {
 		getShoppingListById: mockedGetShoppingListById,
@@ -12,6 +13,7 @@ jest.mock('../../services/shopping-lists', () => {
 		deleteShoppingList: mockedDeleteShoppingList,
 		addNewItemToShoppingList: mockedAddNewItemToShoppingList,
 		updateShoppingItem: mockedUpdateShoppingItem,
+		removeItemFromShoppingList: mockedRemoveItemFromShoppingList,
 	};
 });
 
@@ -778,6 +780,108 @@ describe('controllers', () => {
 				.send({
 					status: 'Purchased',
 				});
+			expect(response.body).toStrictEqual({
+				id: '1',
+				name: 'Banana',
+				quantity: 1,
+				unit: 'piece(s)',
+				status: 'Purchased',
+			});
+		});
+	});
+
+	describe('udpate item in shopping list endpoint', () => {
+		const shoppingListId = '63552a5d00ca2e59a40c1f53';
+		const itemId = '638158f471f9fba20a671d27';
+		it('returns status 409 because shopping list Id is invalid', async () => {
+			const response = await agent.put(
+				`/api/v1/shopping-lists/123/items/${itemId}/delete`
+			);
+			expect(response.status).toBe(409);
+		});
+
+		it('returns error message because shopping list Id is invalid', async () => {
+			const response = await agent.put(
+				`/api/v1/shopping-lists/123/items/${itemId}/delete`
+			);
+			expect(response.body).toBe(
+				'Shopping list Id needs to be 24 characters long.'
+			);
+		});
+
+		it('logs error message because shopping list Id is invalid', async () => {
+			await agent.put(`/api/v1/shopping-lists/123/items/${itemId}/delete`);
+			expect(mockedError).toHaveBeenCalledWith({
+				message: 'An error occurred',
+				description: 'Shopping list Id needs to be 24 characters long.',
+			});
+		});
+
+		it('returns status 409 because item Id is invalid', async () => {
+			const response = await agent.put(
+				`/api/v1/shopping-lists/${shoppingListId}/items/123/delete`
+			);
+			expect(response.status).toBe(409);
+		});
+
+		it('returns error message because item Id is invalid', async () => {
+			const response = await agent.put(
+				`/api/v1/shopping-lists/${shoppingListId}/items/123/delete`
+			);
+			expect(response.body).toBe('Item Id needs to be 24 characters long.');
+		});
+
+		it('logs error message because item Id is invalid', async () => {
+			await agent.put(
+				`/api/v1/shopping-lists/${shoppingListId}/items/123/delete`
+			);
+			expect(mockedError).toHaveBeenCalledWith({
+				message: 'An error occurred',
+				description: 'Item Id needs to be 24 characters long.',
+			});
+		});
+
+		it('returns status code 500 because generic error is thrown from removeItemFromShoppingList', async () => {
+			mockedRemoveItemFromShoppingList.mockRejectedValueOnce(new Error('boom'));
+			const response = await agent.put(
+				`/api/v1/shopping-lists/${shoppingListId}/items/${itemId}/delete`
+			);
+			expect(response.status).toBe(500);
+		});
+
+		it('returns correct error message because generic error is thrown from removeItemFromShoppingList', async () => {
+			mockedRemoveItemFromShoppingList.mockRejectedValueOnce(new Error('boom'));
+			const response = await agent.put(
+				`/api/v1/shopping-lists/${shoppingListId}/items/${itemId}/delete`
+			);
+			expect(response.body).toBe('An unknown error has occurred.');
+		});
+
+		it('returns status code 200 when everything succeeds', async () => {
+			mockedRemoveItemFromShoppingList.mockResolvedValueOnce({
+				id: '1',
+				name: 'Banana',
+				status: 'Purchased',
+				quantity: 1,
+				unit: 'piece(s)',
+			});
+			const response = await agent.put(
+				`/api/v1/shopping-lists/${shoppingListId}/items/${itemId}/delete`
+			);
+			expect(response.status).toBe(200);
+		});
+
+		it('returns deleted shopping item', async () => {
+			mockedRemoveItemFromShoppingList.mockResolvedValueOnce({
+				id: '1',
+				name: 'Banana',
+				status: 'Purchased',
+				quantity: 1,
+				unit: 'piece(s)',
+			});
+			const response = await agent.put(
+				`/api/v1/shopping-lists/${shoppingListId}/items/${itemId}/delete`
+			);
 			expect(response.body).toStrictEqual({
 				id: '1',
 				name: 'Banana',
