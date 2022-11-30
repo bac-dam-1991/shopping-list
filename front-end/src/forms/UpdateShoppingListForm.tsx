@@ -14,6 +14,7 @@ export interface UpdateShoppingListFormProps {
 	closeForm: () => void;
 	data: UpdateShoppingListFormFields;
 	id: string;
+	formId?: string;
 }
 
 export const UpdateShoppingListForm = ({
@@ -21,6 +22,7 @@ export const UpdateShoppingListForm = ({
 	data,
 	closeForm,
 	id,
+	formId,
 }: UpdateShoppingListFormProps) => {
 	const onSubmit = async (formFields: UpdateShoppingListFormFields) => {
 		await updateShoppingListApi(id, formFields);
@@ -32,7 +34,7 @@ export const UpdateShoppingListForm = ({
 		<ShoppingListForm
 			submitForm={onSubmit}
 			defaultValues={data}
-			formId={UpdateShoppingListFormId}
+			formId={formId}
 		/>
 	);
 };

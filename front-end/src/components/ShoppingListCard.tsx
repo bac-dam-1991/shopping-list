@@ -73,8 +73,13 @@ export const ShoppingListCard = ({
 							refetch={onRefetch}
 							data={{ name: data.name }}
 							id={data.id}
+							formId={`${data.id}-${UpdateShoppingItemFormId}`}
 						/>
-						<Button variant="contained" form={UpdateShoppingItemFormId}>
+						<Button
+							variant="contained"
+							type="submit"
+							form={`${data.id}-${UpdateShoppingItemFormId}`}
+						>
 							Update
 						</Button>
 					</Stack>

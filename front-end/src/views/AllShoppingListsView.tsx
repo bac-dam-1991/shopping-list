@@ -21,7 +21,10 @@ export const AllShoppingListsView = () => {
 		<Container>
 			<Stack spacing={2}>
 				<Typography variant="h1">All Shopping Lists</Typography>
-				<NewShoppingListForm refetch={getAllShoppingLists} />
+				<NewShoppingListForm
+					refetch={getAllShoppingLists}
+					formId={NewShoppingItemFormId}
+				/>
 				<Button variant="contained" type="submit" form={NewShoppingItemFormId}>
 					Add
 				</Button>

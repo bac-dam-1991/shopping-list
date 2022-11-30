@@ -1,4 +1,18 @@
 import { Client } from '.';
+import Joi from 'joi';
+
+export const ShoppingListNameSchema = Joi.string()
+	.min(3)
+	.max(50)
+	.required()
+	.messages({
+		'any.required': 'Shopping list name is required.',
+		'string.min':
+			'Shopping list name needs to be at least {#limit} characters long.',
+		'string.max':
+			'Shopping list name cannot be more than {#limit} characters long.',
+		'string.empty': 'Shopping list name is required.',
+	});
 
 export interface ShoppingItem {
 	id: string;
