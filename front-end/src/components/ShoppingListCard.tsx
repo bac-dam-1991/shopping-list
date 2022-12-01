@@ -3,14 +3,15 @@ import EditRoundedIcon from '@mui/icons-material/EditRounded';
 import { UpdateShoppingListForm } from '../forms/UpdateShoppingListForm';
 import CancelRoundedIcon from '@mui/icons-material/CancelRounded';
 import { Typography, Stack, Paper, IconButton, Button } from '@mui/material';
-import { deleteShoppingListApi, ShoppingList } from '../apis/shopping-lists';
+import { deleteShoppingListApi } from '../apis/shopping-lists';
 import { useState } from 'react';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import { useNavigate } from 'react-router-dom';
 import { UpdateShoppingItemFormId } from '../forms/UpdateShoppingItemForm';
+import { ShoppingList, WithId } from '@common/types';
 
 export interface ShoppingListCardProps {
-	data: ShoppingList;
+	data: WithId<ShoppingList>;
 	onRefetch: () => Promise<void>;
 }
 

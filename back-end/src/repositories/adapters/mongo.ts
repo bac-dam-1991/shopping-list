@@ -6,8 +6,7 @@ import {
 	UpdateFilter,
 	AggregateOptions,
 } from 'mongodb';
-export type WithId<T> = T & { id: string };
-export type WithOptionalId<T> = T & { id?: string };
+import { WithId } from '../../../../common/types';
 
 export const connectToMongo = async () => {
 	try {

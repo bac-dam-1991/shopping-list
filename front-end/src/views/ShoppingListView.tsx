@@ -1,17 +1,20 @@
 import { Button, Container, Stack, Typography } from '@mui/material';
 import { useParams } from 'react-router-dom';
 import { useCallback, useEffect, useState } from 'react';
-import { getShoppingListByIdApi, ShoppingList } from '../apis/shopping-lists';
+import { getShoppingListByIdApi } from '../apis/shopping-lists';
 import {
 	NewShoppingItemForm,
 	NewShoppingItemFormId,
 } from '../forms/NewShoppingItemForm';
 import { ShoppingItemCard } from '../components/ShoppingItemCard';
+import { ShoppingList, WithId } from '@common/types';
 
 export const ShoppingListView = () => {
 	const { id } = useParams();
 
-	const [shoppingList, setShoppingList] = useState<ShoppingList | null>(null);
+	const [shoppingList, setShoppingList] = useState<WithId<ShoppingList> | null>(
+		null
+	);
 
 	const getShoppingListById = useCallback(async () => {
 		if (!id) {

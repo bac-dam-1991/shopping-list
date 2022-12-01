@@ -7,33 +7,10 @@ import {
 	findOneAndUpdate,
 	insertOne,
 	updateOne,
-	WithId,
 } from './adapters/mongo';
+import { ShoppingItem, ShoppingList, WithId } from '../../../common/types';
 
 const ShoppingListCollection = 'shopping-lists';
-
-export const Units = [
-	'piece(s)',
-	'kilogram(s)',
-	'litre(s)',
-	'box(es)',
-	'millilitre(s)',
-	'milligram(s)',
-	'carton(s)',
-	'bottle(s)',
-] as const;
-
-export interface ShoppingItem {
-	name: string;
-	unit: string;
-	quantity: number;
-	status: string;
-}
-
-export interface ShoppingList {
-	name: string;
-	items: WithId<ShoppingItem>[];
-}
 
 export const findAllShoppingLists = async (): Promise<
 	WithId<ShoppingList>[]

@@ -12,14 +12,14 @@ import {
 import Joi from 'joi';
 import { validateAndThrowOnError } from './validation';
 import {
+	ShoppingListNameSchema,
 	ItemIdSchema,
 	ItemNameSchema,
 	ItemQuantitySchema,
 	ItemStatusSchema,
 	ItemUnitSchema,
 	ShoppingListIdSchema,
-	ShoppingListNameSchema,
-} from './schemas/shopping-lists';
+} from '../../../common/schemas';
 const router = express.Router();
 
 router.get('', async (req, res, next) => {

@@ -1,18 +1,6 @@
 import { MenuItem, Stack, TextField } from '@mui/material';
 import { useForm, Controller } from 'react-hook-form';
-
-export const Units = [
-	'piece(s)',
-	'kilogram(s)',
-	'litre(s)',
-	'box(es)',
-	'millilitre(s)',
-	'milligram(s)',
-	'carton(s)',
-	'bottle(s)',
-];
-
-export const Statuses = ['New', 'Updated', 'Purchased'];
+import { Units, Statuses } from '@common/utils';
 
 export const ShoppingItemFormId = 'shopping-item-form-id';
 
@@ -55,7 +43,7 @@ export const ShoppingItemForm = ({
 					render={({ field }) => {
 						return (
 							<TextField select label="Unit" {...field}>
-								{Units.sort().map((unit) => {
+								{[...Units].sort().map((unit) => {
 									return (
 										<MenuItem key={unit} value={unit}>
 											{unit}
@@ -72,7 +60,7 @@ export const ShoppingItemForm = ({
 					render={({ field }) => {
 						return (
 							<TextField select label="Status" {...field}>
-								{Statuses.sort().map((status) => {
+								{[...Statuses].sort().map((status) => {
 									return (
 										<MenuItem key={status} value={status}>
 											{status}

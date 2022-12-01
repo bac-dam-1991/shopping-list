@@ -9,15 +9,16 @@ import {
 	Chip,
 	Button,
 } from '@mui/material';
-import { removeShoppingItemApi, ShoppingItem } from '../apis/shopping-lists';
+import { removeShoppingItemApi } from '../apis/shopping-lists';
 import { useState } from 'react';
 import {
 	UpdateShoppingItemForm,
 	UpdateShoppingItemFormId,
 } from '../forms/UpdateShoppingItemForm';
+import { ShoppingItem, WithId } from '@common/types';
 
 export interface ShoppingItemCardProps {
-	data: ShoppingItem;
+	data: WithId<ShoppingItem>;
 	onRefetch: () => Promise<void>;
 	shoppingListId: string;
 }

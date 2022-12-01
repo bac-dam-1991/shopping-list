@@ -1,5 +1,18 @@
 import Joi from 'joi';
-import { Units } from '../../repositories/shopping-lists';
+import { Units } from './utils';
+
+export const ShoppingListNameSchema = Joi.string()
+	.min(2)
+	.max(50)
+	.required()
+	.messages({
+		'any.required': 'Shopping list name is required.',
+		'string.min':
+			'Shopping list name needs to be at least {#limit} characters long.',
+		'string.max':
+			'Shopping list name cannot be more than {#limit} characters long.',
+		'string.empty': 'Shopping list name is required.',
+	});
 
 export const ShoppingListIdSchema = Joi.string()
 	.length(24)
@@ -12,17 +25,7 @@ export const ItemIdSchema = Joi.string().length(24).required().messages({
 	'string.length': 'Item Id needs to be {#limit} characters long.',
 	'any.required': 'Item Id is required.',
 });
-export const ShoppingListNameSchema = Joi.string()
-	.min(3)
-	.max(50)
-	.required()
-	.messages({
-		'any.required': 'Shopping list name is required.',
-		'string.min':
-			'Shopping list name needs to be at least {#limit} characters long.',
-		'string.max':
-			'Shopping list name cannot be more than {#limit} characters long.',
-	});
+
 export const ItemNameSchema = Joi.string().min(3).max(50).required().messages({
 	'any.required': 'Item name is required.',
 	'string.min': 'Item name needs to be at least {#limit} characters long.',

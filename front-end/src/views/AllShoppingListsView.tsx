@@ -1,12 +1,15 @@
 import { Container, Typography, Stack, Button } from '@mui/material';
 import { NewShoppingListForm } from '../forms/NewShoppingListForm';
 import { useEffect, useState, useCallback } from 'react';
-import { getAllShoppingListsApi, ShoppingList } from '../apis/shopping-lists';
+import { getAllShoppingListsApi } from '../apis/shopping-lists';
 import { ShoppingListCard } from '../components/ShoppingListCard';
 import { NewShoppingItemFormId } from '../forms/NewShoppingItemForm';
+import { ShoppingList, WithId } from '@common/types';
 
 export const AllShoppingListsView = () => {
-	const [shoppingLists, setShoppingLists] = useState<ShoppingList[]>([]);
+	const [shoppingLists, setShoppingLists] = useState<WithId<ShoppingList>[]>(
+		[]
+	);
 
 	const getAllShoppingLists = useCallback(async () => {
 		const data = await getAllShoppingListsApi();
