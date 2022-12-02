@@ -90,11 +90,12 @@ export const ShoppingItemCard = ({
 							data={data}
 							refetch={onRefetch}
 							closeForm={() => setIsUpdating(false)}
+							formId={`${data.id}-${UpdateShoppingItemFormId}`}
 						/>
 						<Button
 							variant="contained"
 							type="submit"
-							form={UpdateShoppingItemFormId}
+							form={`${data.id}-${UpdateShoppingItemFormId}`}
 						>
 							Update
 						</Button>

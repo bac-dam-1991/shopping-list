@@ -13,6 +13,7 @@ export interface UpdateShoppingItemFormProps {
 	data: ShoppingItemFormFields;
 	closeForm: () => void;
 	refetch: () => Promise<void>;
+	formId?: string;
 }
 
 export const UpdateShoppingItemForm = ({
@@ -21,6 +22,7 @@ export const UpdateShoppingItemForm = ({
 	data,
 	closeForm,
 	refetch,
+	formId,
 }: UpdateShoppingItemFormProps) => {
 	const submitForm = async (formValues: ShoppingItemFormFields) => {
 		await updateShoppingItemApi(shoppingListId, {
@@ -34,8 +36,13 @@ export const UpdateShoppingItemForm = ({
 	return (
 		<ShoppingItemForm
 			submitForm={submitForm}
-			defaultValues={data}
-			formId={UpdateShoppingItemFormId}
+			defaultValues={{
+				name: data.name,
+				quantity: data.quantity,
+				unit: data.unit,
+				status: data.status,
+			}}
+			formId={formId}
 		/>
 	);
 };

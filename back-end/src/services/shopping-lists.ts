@@ -1,15 +1,13 @@
+import { ShoppingItem, ShoppingList, WithId } from '../../../common/types';
 import { DuplicationError } from '../custom-errors/DuplicationError';
 import { ResourceDoesNotExistError } from '../custom-errors/ResourceDoesNotExistError';
 import { UpdateError } from '../custom-errors/UpdateError';
-import { updateOne, WithId } from '../repositories/adapters/mongo';
 import {
-	ShoppingList,
 	findShoppingListById,
 	insertNewShoppingList,
 	findShoppingListsByName as findShoppingListsByName,
 	updateShoppingListById,
 	deleteShoppingListById,
-	ShoppingItem,
 	addItemToShoppingList,
 	updateItemInShoppingList,
 	getItemInShoppingList,
