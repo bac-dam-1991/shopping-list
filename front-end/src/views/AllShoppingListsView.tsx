@@ -5,8 +5,10 @@ import { getAllShoppingListsApi } from '../apis/shopping-lists';
 import { ShoppingListCard } from '../components/ShoppingListCard';
 import { NewShoppingItemFormId } from '../forms/NewShoppingItemForm';
 import { ShoppingList, WithId } from '@common/types';
+import { withAuthenticationRequired } from '@auth0/auth0-react';
+import { Loader } from '../components/Loader';
 
-export const AllShoppingListsView = () => {
+const BaseAllShoppingListsView = () => {
 	const [shoppingLists, setShoppingLists] = useState<WithId<ShoppingList>[]>(
 		[]
 	);
@@ -21,9 +23,15 @@ export const AllShoppingListsView = () => {
 	}, [getAllShoppingLists]);
 
 	return (
-		<Container>
+		<Container maxWidth="sm">
+			<Typography
+				variant="h3"
+				component="h1"
+				sx={{ my: 5, textAlign: 'center' }}
+			>
+				My Shopping Lists
+			</Typography>
 			<Stack spacing={2}>
-				<Typography variant="h1">All Shopping Lists</Typography>
 				<NewShoppingListForm
 					refetch={getAllShoppingLists}
 					formId={NewShoppingItemFormId}
@@ -44,3 +52,8 @@ export const AllShoppingListsView = () => {
 		</Container>
 	);
 };
+
+export const AllShoppingListsView = withAuthenticationRequired(
+	BaseAllShoppingListsView,
+	{ onRedirecting: () => <Loader /> }
+);

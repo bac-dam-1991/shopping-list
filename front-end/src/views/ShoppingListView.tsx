@@ -1,4 +1,5 @@
 import { Button, Container, Stack, Typography } from '@mui/material';
+import { Loader } from '../components/Loader';
 import { useParams } from 'react-router-dom';
 import { useCallback, useEffect, useState } from 'react';
 import { getShoppingListByIdApi } from '../apis/shopping-lists';
@@ -8,8 +9,9 @@ import {
 } from '../forms/NewShoppingItemForm';
 import { ShoppingItemCard } from '../components/ShoppingItemCard';
 import { ShoppingList, WithId } from '@common/types';
+import { withAuthenticationRequired } from '@auth0/auth0-react';
 
-export const ShoppingListView = () => {
+const BaseShoppingListView = () => {
 	const { id } = useParams();
 
 	const [shoppingList, setShoppingList] = useState<WithId<ShoppingList> | null>(
@@ -29,13 +31,19 @@ export const ShoppingListView = () => {
 	}, [getShoppingListById]);
 
 	return (
-		<Container>
+		<Container maxWidth="sm">
+			{shoppingList ? (
+				<Typography
+					variant="h3"
+					component="h1"
+					sx={{ my: 5, textAlign: 'center' }}
+				>
+					{shoppingList.name} List
+				</Typography>
+			) : (
+				<Loader />
+			)}
 			<Stack spacing={2}>
-				{shoppingList ? (
-					<Typography variant="h1">{shoppingList.name} List</Typography>
-				) : (
-					<Typography>Loading shopping list</Typography>
-				)}
 				{id && (
 					<Stack spacing={2}>
 						<NewShoppingItemForm
@@ -66,3 +74,7 @@ export const ShoppingListView = () => {
 		</Container>
 	);
 };
+export const ShoppingListView = withAuthenticationRequired(
+	BaseShoppingListView,
+	{ onRedirecting: () => <Loader /> }
+);
