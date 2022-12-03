@@ -24,6 +24,7 @@ export const Auth0ProviderWithHistory = ({
 			clientId={clientId}
 			redirectUri={window.location.origin}
 			onRedirectCallback={onRedirectCallback}
+			audience="http://shopping-list/app"
 		>
 			{children}
 		</Auth0Provider>

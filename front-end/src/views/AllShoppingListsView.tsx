@@ -1,7 +1,7 @@
 import { Container, Typography, Stack, Button } from '@mui/material';
 import { NewShoppingListForm } from '../forms/NewShoppingListForm';
 import { useEffect, useState, useCallback } from 'react';
-import { getAllShoppingListsApi } from '../apis/shopping-lists';
+import { useGetAllShoppingListsApi } from '../apis/shopping-lists';
 import { ShoppingListCard } from '../components/ShoppingListCard';
 import { NewShoppingItemFormId } from '../forms/NewShoppingItemForm';
 import { ShoppingList, WithId } from '@common/types';
@@ -12,11 +12,12 @@ const BaseAllShoppingListsView = () => {
 	const [shoppingLists, setShoppingLists] = useState<WithId<ShoppingList>[]>(
 		[]
 	);
+	const { getAllShoppingListsApi } = useGetAllShoppingListsApi();
 
 	const getAllShoppingLists = useCallback(async () => {
 		const data = await getAllShoppingListsApi();
 		setShoppingLists(data);
-	}, []);
+	}, [getAllShoppingListsApi]);
 
 	useEffect(() => {
 		getAllShoppingLists();

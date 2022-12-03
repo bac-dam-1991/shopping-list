@@ -3,7 +3,7 @@ import EditRoundedIcon from '@mui/icons-material/EditRounded';
 import { UpdateShoppingListForm } from '../forms/UpdateShoppingListForm';
 import CancelRoundedIcon from '@mui/icons-material/CancelRounded';
 import { Typography, Stack, Paper, IconButton, Button } from '@mui/material';
-import { deleteShoppingListApi } from '../apis/shopping-lists';
+import { useDeleteShoppingListApi } from '../apis/shopping-lists';
 import { useState } from 'react';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import { useNavigate } from 'react-router-dom';
@@ -21,6 +21,7 @@ export const ShoppingListCard = ({
 }: ShoppingListCardProps) => {
 	const [isUpdating, setIsUpdating] = useState<boolean>(false);
 	const navigate = useNavigate();
+	const { deleteShoppingListApi } = useDeleteShoppingListApi();
 
 	const handleCancelUpdate = () => {
 		setIsUpdating(false);

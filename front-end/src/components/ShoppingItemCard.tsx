@@ -9,7 +9,7 @@ import {
 	Chip,
 	Button,
 } from '@mui/material';
-import { removeShoppingItemApi } from '../apis/shopping-lists';
+import { useRemoveShoppingItemApi } from '../apis/shopping-lists';
 import { useState } from 'react';
 import {
 	UpdateShoppingItemForm,
@@ -29,6 +29,7 @@ export const ShoppingItemCard = ({
 	shoppingListId,
 }: ShoppingItemCardProps) => {
 	const [isUpdating, setIsUpdating] = useState<boolean>(false);
+	const { removeShoppingItemApi } = useRemoveShoppingItemApi();
 
 	const handleCancelUpdate = () => {
 		setIsUpdating(false);

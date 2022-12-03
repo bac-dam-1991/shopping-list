@@ -1,4 +1,4 @@
-import { addItemToShoppingListApi } from '../apis/shopping-lists';
+import { useAddItemToShoppingListApi } from '../apis/shopping-lists';
 import {
 	ShoppingItemForm,
 	ShoppingItemFormFields,
@@ -16,6 +16,7 @@ export const NewShoppingItemForm = ({
 	refetch,
 	shoppingListId,
 }: NewShoppingItemFormProps) => {
+	const { addItemToShoppingListApi } = useAddItemToShoppingListApi();
 	const submitForm = async (formValues: ShoppingItemFormFields) => {
 		await addItemToShoppingListApi(shoppingListId, formValues);
 		await refetch();

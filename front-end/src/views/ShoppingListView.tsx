@@ -2,7 +2,7 @@ import { Button, Container, Stack, Typography } from '@mui/material';
 import { Loader } from '../components/Loader';
 import { useParams } from 'react-router-dom';
 import { useCallback, useEffect, useState } from 'react';
-import { getShoppingListByIdApi } from '../apis/shopping-lists';
+import { useGetShoppingListByIdApi } from '../apis/shopping-lists';
 import {
 	NewShoppingItemForm,
 	NewShoppingItemFormId,
@@ -17,6 +17,7 @@ const BaseShoppingListView = () => {
 	const [shoppingList, setShoppingList] = useState<WithId<ShoppingList> | null>(
 		null
 	);
+	const { getShoppingListByIdApi } = useGetShoppingListByIdApi();
 
 	const getShoppingListById = useCallback(async () => {
 		if (!id) {
@@ -24,7 +25,7 @@ const BaseShoppingListView = () => {
 		}
 		const data = await getShoppingListByIdApi(id);
 		setShoppingList(data);
-	}, [id]);
+	}, [id, getShoppingListByIdApi]);
 
 	useEffect(() => {
 		getShoppingListById();
