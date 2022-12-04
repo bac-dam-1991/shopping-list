@@ -21,9 +21,8 @@ jest.mock('../../repositories/shopping-lists', () => {
 	};
 });
 
+import { ShoppingItem, WithId } from '../../../../common/types';
 import { mockedError } from '../../../jest/setupTests';
-import { WithId } from '../../repositories/adapters/mongo';
-import { ShoppingItem } from '../../repositories/shopping-lists';
 import {
 	addNewItemToShoppingList,
 	addNewShoppingList,
@@ -92,14 +91,17 @@ describe('Shopping lists service functions', () => {
 
 	describe('addNewShoppingList', () => {
 		const name = 'Groceries';
+		const sub = 'Sub';
 		it('throws error from findShoppingListsByName', async () => {
 			mockedFindShoppingListsByName.mockRejectedValueOnce(new Error('boom'));
-			await expect(addNewShoppingList(name)).rejects.toThrowError('boom');
+			await expect(addNewShoppingList({ name, sub })).rejects.toThrowError(
+				'boom'
+			);
 		});
 		it('logs error from findShoppingListsByName', async () => {
 			mockedFindShoppingListsByName.mockRejectedValueOnce(new Error('boom'));
 			try {
-				await addNewShoppingList(name);
+				await addNewShoppingList({ name, sub });
 			} catch {}
 			expect(mockedError).toHaveBeenCalledWith({
 				message: 'Unable to add new shopping list',
@@ -110,20 +112,20 @@ describe('Shopping lists service functions', () => {
 		it('calls findShoppingListsByName with correct payload', async () => {
 			mockedFindShoppingListsByName.mockRejectedValueOnce(new Error('boom'));
 			try {
-				await addNewShoppingList(name);
+				await addNewShoppingList({ name, sub });
 			} catch {}
 			expect(mockedFindShoppingListsByName).toHaveBeenCalledWith(name);
 		});
 		it('throws error from findShoppingListsByName because there is a shopping list with the same name', async () => {
 			mockedFindShoppingListsByName.mockResolvedValueOnce([{ name }]);
-			await expect(addNewShoppingList(name)).rejects.toThrowError(
+			await expect(addNewShoppingList({ name, sub })).rejects.toThrowError(
 				'Shopping list with the same name already exists.'
 			);
 		});
 		it('logs error from findShoppingListsByName because there is a shopping list with the same name', async () => {
 			mockedFindShoppingListsByName.mockResolvedValueOnce([{ name }]);
 			try {
-				await addNewShoppingList(name);
+				await addNewShoppingList({ name, sub });
 			} catch {}
 			expect(mockedError).toHaveBeenCalledWith({
 				message: 'Unable to add new shopping list',
@@ -134,13 +136,15 @@ describe('Shopping lists service functions', () => {
 		it('throws error from insertNewShoppingList', async () => {
 			mockedFindShoppingListsByName.mockResolvedValueOnce([]);
 			mockedInsertNewShoppingList.mockRejectedValueOnce(new Error('boom'));
-			await expect(addNewShoppingList(name)).rejects.toThrowError('boom');
+			await expect(addNewShoppingList({ name, sub })).rejects.toThrowError(
+				'boom'
+			);
 		});
 		it('logs error from insertNewShoppingList', async () => {
 			mockedFindShoppingListsByName.mockResolvedValueOnce([]);
 			mockedInsertNewShoppingList.mockRejectedValueOnce(new Error('boom'));
 			try {
-				await addNewShoppingList(name);
+				await addNewShoppingList({ name, sub });
 			} catch {}
 			expect(mockedError).toHaveBeenCalledWith({
 				message: 'Unable to add new shopping list',
@@ -152,7 +156,7 @@ describe('Shopping lists service functions', () => {
 			mockedFindShoppingListsByName.mockResolvedValueOnce([]);
 			mockedInsertNewShoppingList.mockRejectedValueOnce(new Error('boom'));
 			try {
-				await addNewShoppingList(name);
+				await addNewShoppingList({ name, sub });
 			} catch {}
 			expect(mockedInsertNewShoppingList).toHaveBeenCalledWith({
 				name,
@@ -166,7 +170,7 @@ describe('Shopping lists service functions', () => {
 				name: 'Groceries',
 				items: [],
 			});
-			const result = await addNewShoppingList(name);
+			const result = await addNewShoppingList({ name, sub });
 			expect(result).toStrictEqual({
 				id: '635a72d64ab70da3b2628549',
 				name: 'Groceries',
@@ -178,16 +182,17 @@ describe('Shopping lists service functions', () => {
 	describe('updateShoppingList', () => {
 		const shoppingListId = '63552a5d00ca2e59a40c1f53';
 		const newName = 'New name';
+		const sub = 'sub';
 		it('throws error from findShoppingListsByName', async () => {
 			mockedFindShoppingListsByName.mockRejectedValueOnce(new Error('boom'));
 			await expect(
-				updateShoppingList(shoppingListId, { name: newName })
+				updateShoppingList(shoppingListId, { name: newName, sub })
 			).rejects.toThrowError('boom');
 		});
 		it('logs error from findShoppingListsByName', async () => {
 			mockedFindShoppingListsByName.mockRejectedValueOnce(new Error('boom'));
 			try {
-				await updateShoppingList(shoppingListId, { name: newName });
+				await updateShoppingList(shoppingListId, { name: newName, sub });
 			} catch {}
 			expect(mockedError).toHaveBeenCalledWith({
 				message: 'Unable to update shopping list',
@@ -199,7 +204,7 @@ describe('Shopping lists service functions', () => {
 		it('calls findShoppingListsByName with correct payload', async () => {
 			mockedFindShoppingListsByName.mockRejectedValueOnce(new Error('boom'));
 			try {
-				await updateShoppingList(shoppingListId, { name: newName });
+				await updateShoppingList(shoppingListId, { name: newName, sub });
 			} catch {}
 			expect(mockedFindShoppingListsByName).toHaveBeenCalledWith(newName);
 		});
@@ -208,7 +213,7 @@ describe('Shopping lists service functions', () => {
 				{ id: '6357c355568d5d5ebde28573', name: 'New name', items: [] },
 			]);
 			await expect(
-				updateShoppingList(shoppingListId, { name: newName })
+				updateShoppingList(shoppingListId, { name: newName, sub })
 			).rejects.toThrowError('Shopping list name already exists');
 		});
 		it('logs error because shopping list with the same name is found', async () => {
@@ -216,7 +221,7 @@ describe('Shopping lists service functions', () => {
 				{ id: '6357c355568d5d5ebde28573', name: 'New name', items: [] },
 			]);
 			try {
-				await updateShoppingList(shoppingListId, { name: newName });
+				await updateShoppingList(shoppingListId, { name: newName, sub });
 			} catch {}
 			expect(mockedError).toHaveBeenCalledWith({
 				message: 'Unable to update shopping list',
@@ -229,14 +234,14 @@ describe('Shopping lists service functions', () => {
 			mockedFindShoppingListsByName.mockResolvedValueOnce([]);
 			mockedUpdateShoppingListById.mockRejectedValueOnce(new Error('boom'));
 			await expect(
-				updateShoppingList(shoppingListId, { name: newName })
+				updateShoppingList(shoppingListId, { name: newName, sub })
 			).rejects.toThrowError('boom');
 		});
 		it('logs error from updateShoppingListById', async () => {
 			mockedFindShoppingListsByName.mockResolvedValueOnce([]);
 			mockedUpdateShoppingListById.mockRejectedValueOnce(new Error('boom'));
 			try {
-				await updateShoppingList(shoppingListId, { name: newName });
+				await updateShoppingList(shoppingListId, { name: newName, sub });
 			} catch {}
 			expect(mockedError).toHaveBeenCalledWith({
 				message: 'Unable to update shopping list',
@@ -249,7 +254,7 @@ describe('Shopping lists service functions', () => {
 			mockedFindShoppingListsByName.mockResolvedValueOnce([]);
 			mockedUpdateShoppingListById.mockRejectedValueOnce(new Error('boom'));
 			try {
-				await updateShoppingList(shoppingListId, { name: newName });
+				await updateShoppingList(shoppingListId, { name: newName, sub });
 			} catch {}
 			expect(mockedUpdateShoppingListById).toHaveBeenCalledWith(
 				shoppingListId,
@@ -260,14 +265,14 @@ describe('Shopping lists service functions', () => {
 			mockedFindShoppingListsByName.mockResolvedValueOnce([]);
 			mockedUpdateShoppingListById.mockResolvedValueOnce(false);
 			await expect(
-				updateShoppingList(shoppingListId, { name: newName })
+				updateShoppingList(shoppingListId, { name: newName, sub })
 			).rejects.toThrowError('Unable to update shopping list');
 		});
 		it('logs error because result is false', async () => {
 			mockedFindShoppingListsByName.mockResolvedValueOnce([]);
 			mockedUpdateShoppingListById.mockResolvedValueOnce(false);
 			try {
-				await updateShoppingList(shoppingListId, { name: newName });
+				await updateShoppingList(shoppingListId, { name: newName, sub });
 			} catch {}
 			expect(mockedError).toHaveBeenCalledWith({
 				message: 'Unable to update shopping list',
@@ -285,6 +290,7 @@ describe('Shopping lists service functions', () => {
 			});
 			const result = await updateShoppingList(shoppingListId, {
 				name: newName,
+				sub,
 			});
 			expect(result).toStrictEqual({
 				name: 'Stationary',

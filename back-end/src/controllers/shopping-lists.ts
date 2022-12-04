@@ -19,12 +19,14 @@ import {
 	ItemStatusSchema,
 	ItemUnitSchema,
 	ShoppingListIdSchema,
+	UserSubSchema,
 } from '../../../common/schemas';
 const router = express.Router();
 
 router.get('', async (req, res, next) => {
 	try {
-		const shoppingLists = await findAllShoppingLists();
+		const sub = (req as any).auth.sub;
+		const shoppingLists = await findAllShoppingLists(sub);
 		res.status(200).json(shoppingLists);
 	} catch (error) {
 		next(error);
@@ -45,8 +47,13 @@ router.get('/:id', async (req, res, next) => {
 router.post('', async (req, res, next) => {
 	try {
 		const { name } = req.body;
-		validateAndThrowOnError(ShoppingListNameSchema, name);
-		const shoppingList = await addNewShoppingList(name);
+		const sub = (req as any).auth.sub;
+		const Schema = Joi.object().keys({
+			sub: UserSubSchema,
+			name: ShoppingListNameSchema,
+		});
+		validateAndThrowOnError(Schema, { name, sub });
+		const shoppingList = await addNewShoppingList({ name, sub });
 		res.status(201).json(shoppingList);
 	} catch (error) {
 		next(error);
@@ -57,12 +64,14 @@ router.put('/:id', async (req, res, next) => {
 	try {
 		const { name } = req.body;
 		const { id } = req.params;
+		const sub = (req as any).auth.sub;
 		const Schema = Joi.object().keys({
 			id: ShoppingListIdSchema,
 			name: ShoppingListNameSchema,
+			sub: UserSubSchema,
 		});
-		validateAndThrowOnError(Schema, { id, name });
-		const updatedShoppingList = await updateShoppingList(id, { name });
+		validateAndThrowOnError(Schema, { id, name, sub });
+		const updatedShoppingList = await updateShoppingList(id, { name, sub });
 		res.status(200).json(updatedShoppingList);
 	} catch (error) {
 		next(error);

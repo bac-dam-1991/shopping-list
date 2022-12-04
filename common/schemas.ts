@@ -14,6 +14,11 @@ export const ShoppingListNameSchema = Joi.string()
 		'string.empty': 'Shopping list name is required.',
 	});
 
+export const UserSubSchema = Joi.string().required().messages({
+	'any.required': 'User sub is required.',
+	'string.empty': 'User sub is required.',
+});
+
 export const ShoppingListIdSchema = Joi.string()
 	.length(24)
 	.required()

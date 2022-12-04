@@ -10,4 +10,5 @@ export interface ShoppingItem {
 export interface ShoppingList {
 	name: string;
 	items: WithId<ShoppingItem>[];
+	sub: string;
 }

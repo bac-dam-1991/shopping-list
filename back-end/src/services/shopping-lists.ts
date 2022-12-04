@@ -5,7 +5,7 @@ import { UpdateError } from '../custom-errors/UpdateError';
 import {
 	findShoppingListById,
 	insertNewShoppingList,
-	findShoppingListsByName as findShoppingListsByName,
+	findShoppingListsByName,
 	updateShoppingListById,
 	deleteShoppingListById,
 	addItemToShoppingList,
@@ -42,14 +42,16 @@ export const getShoppingListById = async (
 /**
  * Add a new shopping list.
  * If another shopping list with the same name exists, an error is thrown.
- * @param {string} name - The name of the new shopping list.
+ * @param {string} args.name - The name of the new shopping list.
  * @returns {Promise<WithId<ShoppingList>>} The newly created shopping list
  */
-export const addNewShoppingList = async (
-	name: string
-): Promise<WithId<ShoppingList>> => {
+export const addNewShoppingList = async (args: {
+	name: string;
+	sub: string;
+}): Promise<WithId<ShoppingList>> => {
 	try {
-		const shoppingLists = await findShoppingListsByName(name);
+		const { name, sub } = args;
+		const shoppingLists = await findShoppingListsByName({ name, sub });
 		if (shoppingLists.length > 0) {
 			throw new DuplicationError(
 				'Shopping list with the same name already exists.'
@@ -58,12 +60,13 @@ export const addNewShoppingList = async (
 		return await insertNewShoppingList({
 			name,
 			items: [],
+			sub,
 		});
 	} catch (error) {
 		console.error({
 			message: 'Unable to add new shopping list',
 			description: (error as Error).message,
-			name,
+			args,
 		});
 		throw error;
 	}
@@ -79,11 +82,11 @@ export const addNewShoppingList = async (
  */
 export const updateShoppingList = async (
 	id: string,
-	payload: { name: string }
+	payload: { name: string; sub: string }
 ): Promise<WithId<ShoppingList>> => {
 	try {
-		const { name } = payload;
-		const shoppingLists = await findShoppingListsByName(name);
+		const { name, sub } = payload;
+		const shoppingLists = await findShoppingListsByName({ name, sub });
 		if (shoppingLists.length > 0) {
 			throw new DuplicationError('Shopping list name already exists');
 		}

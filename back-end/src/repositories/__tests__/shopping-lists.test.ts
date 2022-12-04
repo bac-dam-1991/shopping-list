@@ -26,13 +26,12 @@ import {
 	getItemInShoppingList,
 	insertNewShoppingList,
 	pullItemFromShoppingList,
-	ShoppingItem,
 	updateItemInShoppingList,
 	updateShoppingListById,
 } from '../shopping-lists';
 import { mockedError } from '../../../jest/setupTests';
 import { ObjectId } from 'mongodb';
-import { WithId } from '../adapters/mongo';
+import { ShoppingItem, WithId } from '../../../../common/types';
 
 describe('shopping lists repository functions', () => {
 	describe('findAllShoppingLists', () => {
@@ -43,14 +42,15 @@ describe('shopping lists repository functions', () => {
 				id: '63552a5d00ca2e59a40c1f53',
 			},
 		];
+		const sub = 'sub';
 		it('throws error from find', async () => {
 			mockedFind.mockRejectedValueOnce(new Error('boom'));
-			await expect(findAllShoppingLists()).rejects.toThrowError('boom');
+			await expect(findAllShoppingLists(sub)).rejects.toThrowError('boom');
 		});
 		it('throws error from find', async () => {
 			mockedFind.mockRejectedValueOnce(new Error('boom'));
 			try {
-				await findAllShoppingLists();
+				await findAllShoppingLists(sub);
 			} catch {}
 			expect(mockedError).toHaveBeenCalledWith({
 				message: 'Unable to find all shopping lists',
@@ -60,13 +60,13 @@ describe('shopping lists repository functions', () => {
 		it('calls find with correct payload', async () => {
 			mockedFind.mockRejectedValueOnce(new Error('boom'));
 			try {
-				await findAllShoppingLists();
+				await findAllShoppingLists(sub);
 			} catch {}
 			expect(mockedFind).toHaveBeenCalledWith('shopping-lists');
 		});
 		it('returns the correct result', async () => {
 			mockedFind.mockResolvedValueOnce(mockedResult);
-			const result = await findAllShoppingLists();
+			const result = await findAllShoppingLists(sub);
 			expect(result).toStrictEqual(mockedResult);
 		});
 	});
@@ -115,6 +115,7 @@ describe('shopping lists repository functions', () => {
 		const payload = {
 			name: 'Fruits and Vegs',
 			items: [],
+			sub: 'sub',
 		};
 		it('throws error from insertOne', async () => {
 			mockedInsertOne.mockRejectedValueOnce(new Error('boom'));
@@ -146,14 +147,17 @@ describe('shopping lists repository functions', () => {
 	});
 	describe('findShoppingListsByName', () => {
 		const name = 'Fruits and Vegs';
+		const sub = 'sub';
 		it('throws error from find', async () => {
 			mockedFind.mockRejectedValueOnce(new Error('boom'));
-			await expect(findShoppingListsByName(name)).rejects.toThrowError('boom');
+			await expect(findShoppingListsByName({ name, sub })).rejects.toThrowError(
+				'boom'
+			);
 		});
 		it('logs error from find', async () => {
 			mockedFind.mockRejectedValueOnce(new Error('boom'));
 			try {
-				await findShoppingListsByName(name);
+				await findShoppingListsByName({ name, sub });
 			} catch {}
 			expect(mockedError).toHaveBeenCalledWith({
 				message: 'Unable to find shopping list by name',
@@ -164,7 +168,7 @@ describe('shopping lists repository functions', () => {
 		it('calls find with correct payload', async () => {
 			mockedFind.mockRejectedValueOnce(new Error('boom'));
 			try {
-				await findShoppingListsByName(name);
+				await findShoppingListsByName({ name, sub });
 			} catch {}
 			expect(mockedFind).toHaveBeenCalledWith('shopping-lists', { name });
 		});
@@ -172,7 +176,7 @@ describe('shopping lists repository functions', () => {
 			mockedFind.mockResolvedValueOnce([
 				{ id: '635a732b98ca699215c94708', name: 'Fruits and Vegs', items: [] },
 			]);
-			const result = await findShoppingListsByName(name);
+			const result = await findShoppingListsByName({ name, sub });
 			expect(result).toStrictEqual([
 				{ id: '635a732b98ca699215c94708', name: 'Fruits and Vegs', items: [] },
 			]);

@@ -12,11 +12,11 @@ import { ShoppingItem, ShoppingList, WithId } from '../../../common/types';
 
 const ShoppingListCollection = 'shopping-lists';
 
-export const findAllShoppingLists = async (): Promise<
-	WithId<ShoppingList>[]
-> => {
+export const findAllShoppingLists = async (
+	sub: string
+): Promise<WithId<ShoppingList>[]> => {
 	try {
-		return await find<ShoppingList>(ShoppingListCollection);
+		return await find<ShoppingList>(ShoppingListCollection, { sub });
 	} catch (error) {
 		console.error({
 			message: 'Unable to find all shopping lists',
@@ -73,11 +73,13 @@ export const insertNewShoppingList = async (
  * @param {string} name - The shopping list name
  * @returns {Promise<WithId<ShoppingList>[]>} The array of shopping lists with the same name
  */
-export const findShoppingListsByName = async (
-	name: string
-): Promise<WithId<ShoppingList>[]> => {
+export const findShoppingListsByName = async (args: {
+	name: string;
+	sub: string;
+}): Promise<WithId<ShoppingList>[]> => {
 	try {
-		return await find<ShoppingList>(ShoppingListCollection, { name });
+		const { name, sub } = args;
+		return await find<ShoppingList>(ShoppingListCollection, { name, sub });
 	} catch (error) {
 		console.error({
 			message: 'Unable to find shopping list by name',
