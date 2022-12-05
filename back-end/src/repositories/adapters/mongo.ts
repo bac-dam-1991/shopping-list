@@ -10,11 +10,14 @@ import { WithId } from '../../../../common/types';
 
 export const connectToMongo = async () => {
 	try {
-		const DatabaseName = 'shopping-list-app';
-		const ConnectionString = 'mongodb://localhost:27017';
-		const client = new MongoClient(ConnectionString);
+		const DB_NAME = process.env.MONGO_DB_NAME;
+		const HOST = process.env.MONGO_HOST;
+		const SCHEME = process.env.MONGO_SCHEME;
+		const PORT = process.env.MONGO_PORT;
+		const CONNECTION_STRING = `${SCHEME}://${HOST}:${PORT}`;
+		const client = new MongoClient(CONNECTION_STRING);
 		await client.connect();
-		return client.db(DatabaseName);
+		return client.db(DB_NAME);
 	} catch (error) {
 		console.error({
 			message: 'Cannot create Mongo client',

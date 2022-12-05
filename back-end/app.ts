@@ -9,13 +9,13 @@ const secret = jwks.expressJwtSecret({
 	cache: true,
 	rateLimit: true,
 	jwksRequestsPerMinute: 5,
-	jwksUri: 'https://shopping-list.au.auth0.com/.well-known/jwks.json',
+	jwksUri: process.env.AUTH0_JWKS_URI!,
 }) as GetVerificationKey;
 
 const jwtCheck = jwt({
 	secret,
-	audience: 'http://shopping-list/app',
-	issuer: 'https://shopping-list.au.auth0.com/',
+	audience: process.env.AUTH0_AUDIENCE!,
+	issuer: process.env.AUTH0_ISSUER!,
 	algorithms: ['RS256'],
 });
 
