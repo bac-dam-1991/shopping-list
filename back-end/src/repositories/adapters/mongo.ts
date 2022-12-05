@@ -8,14 +8,32 @@ import {
 } from 'mongodb';
 import { WithId } from '../../../../common/types';
 
+const generateConnectionString = () => {
+	const HOST = process.env.MONGO_HOST;
+	const SCHEME = process.env.MONGO_SCHEME;
+	const PORT = process.env.MONGO_PORT;
+	const USERNAME = process.env.MONGO_USERNAME;
+	const PASSWORD = process.env.MONGO_PASSWORD;
+	const QUERY = process.env.MONGO_QUERY;
+	let connectionString = `${SCHEME}://`;
+	if (USERNAME && PASSWORD) {
+		connectionString += `${USERNAME}:${PASSWORD}@`;
+	}
+	connectionString += HOST;
+	if (PORT) {
+		connectionString += `:${PORT}`;
+	}
+	if (QUERY) {
+		connectionString += `?${QUERY}`;
+	}
+	return connectionString;
+};
+
 export const connectToMongo = async () => {
 	try {
 		const DB_NAME = process.env.MONGO_DB_NAME;
-		const HOST = process.env.MONGO_HOST;
-		const SCHEME = process.env.MONGO_SCHEME;
-		const PORT = process.env.MONGO_PORT;
-		const CONNECTION_STRING = `${SCHEME}://${HOST}:${PORT}`;
-		const client = new MongoClient(CONNECTION_STRING);
+		const connectionString = generateConnectionString();
+		const client = new MongoClient(connectionString);
 		await client.connect();
 		return client.db(DB_NAME);
 	} catch (error) {
