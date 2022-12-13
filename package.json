@@ -2,7 +2,10 @@
 	"scripts": {
 		"start:fe": "cd ./front-end && npm start",
 		"start:be": "cd ./back-end && npm start",
-		"start": "concurrently \"yarn:start:*\""
+		"start": "concurrently \"npm:start:*\"",
+		"build:fe": "cd ./front-end && npm run build",
+		"build:be": "cd ./back-end && npm run build",
+		"build": "concurrently \"npm:build:*\""
 	},
 	"devDependencies": {
 		"concurrently": "^7.5.0"

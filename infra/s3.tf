@@ -1,5 +1,5 @@
 resource "aws_s3_bucket" "app_bucket" {
-  bucket        = "${var.lambda_function_name}-bucket"
+  bucket        = var.s3_bucket_name
   force_destroy = true
 
   tags = merge(var.default_tags, {

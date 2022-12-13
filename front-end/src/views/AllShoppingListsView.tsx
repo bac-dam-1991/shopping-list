@@ -26,7 +26,7 @@ const BaseAllShoppingListsView = () => {
 	return (
 		<Container maxWidth="sm">
 			<Typography
-				variant="h3"
+				variant="h4"
 				component="h1"
 				sx={{ my: 5, textAlign: 'center' }}
 			>

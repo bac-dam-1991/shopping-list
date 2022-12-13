@@ -2,10 +2,14 @@ variable "lambda_function_name" {
   default = "shopping-list-app-server-tf"
 }
 
+variable "s3_bucket_name" {
+  default = "shopping-list-app-bucket"
+}
+
 variable "default_tags" {
   type = map(string)
   default = {
-    "AppName" : "shopping-list-app-server-tf"
+    "AppName" : "shopping-list-app-tf"
   }
 }
 
