@@ -6,9 +6,9 @@ export interface Auth0ProviderWithHistoryProps {
 	children: ReactNode;
 }
 
-const domain = process.env.REACT_APP_AUTH0_DOMAIN!;
-const clientId = process.env.REACT_APP_AUTH0_CLIENT_ID!;
-const audience = process.env.REACT_APP_AUTH0_AUDIENCE!;
+const domain = window.__appConfig__.auth0Domain;
+const clientId = window.__appConfig__.auth0ClientId;
+const audience = window.__appConfig__.auth0Audience!;
 
 export const Auth0ProviderWithHistory = ({
 	children,

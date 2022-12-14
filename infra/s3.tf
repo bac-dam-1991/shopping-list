@@ -31,3 +31,13 @@ resource "aws_s3_bucket_policy" "public_access" {
     "CLOUDFRONT_ARN" = "${aws_cloudfront_distribution.s3_distribution.arn}"
   })
 }
+
+resource "local_file" "app_config" {
+  filename = "${path.module}/dist/app/app-config.js"
+  content = templatefile("./src/app-config.js", {
+    API_ENDPOINT    = "${aws_apigatewayv2_api.lambda_api.api_endpoint}/api/v1/"
+    AUTH0_DOMAIN    = "${var.auth0_domain}"
+    AUTH0_CLIENT_ID = "${var.auth0_client_id}"
+    AUTH0_AUDIENCE  = "${var.auth0_audience}"
+  })
+}

@@ -31,7 +31,7 @@ resource "aws_cloudfront_distribution" "s3_distribution" {
     response_code      = 200
   }
 
-  aliases = ["shopping-list-app.bacdam.dev"]
+  aliases = [var.domain]
 
   default_cache_behavior {
     allowed_methods  = ["GET", "HEAD", "OPTIONS"]

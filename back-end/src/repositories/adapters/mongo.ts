@@ -8,16 +8,42 @@ import {
 } from 'mongodb';
 import { WithId } from '../../../../common/types';
 
-const generateConnectionString = () => {
+import {
+	SecretsManagerClient,
+	GetSecretValueCommand,
+} from '@aws-sdk/client-secrets-manager';
+
+const generateConnectionString = async () => {
 	const HOST = process.env.MONGO_HOST;
 	const SCHEME = process.env.MONGO_SCHEME;
 	const PORT = process.env.MONGO_PORT;
 	const USERNAME = process.env.MONGO_USERNAME;
-	const PASSWORD = process.env.MONGO_PASSWORD;
+	const SECRET_MONGO_PASSWORD = process.env.SECRET_MONGO_PASSWORD;
 	const QUERY = process.env.MONGO_QUERY;
 	let connectionString = `${SCHEME}://`;
-	if (USERNAME && PASSWORD) {
-		connectionString += `${USERNAME}:${PASSWORD}@`;
+
+	if (USERNAME && SECRET_MONGO_PASSWORD) {
+		const client = new SecretsManagerClient({
+			region: process.env.DEFAULT_REGION || 'ap-southeast-2',
+		});
+
+		try {
+			const response = await client.send(
+				new GetSecretValueCommand({
+					SecretId: SECRET_MONGO_PASSWORD,
+					VersionStage: 'AWSCURRENT',
+				})
+			);
+
+			const password = response.SecretString;
+			connectionString += `${USERNAME}:${password}@`;
+		} catch (error) {
+			console.error({
+				message: (error as Error).message,
+				description: 'Unable to retrieve secret',
+			});
+			throw error;
+		}
 	}
 	connectionString += HOST;
 	if (PORT) {
@@ -32,7 +58,7 @@ const generateConnectionString = () => {
 export const connectToMongo = async () => {
 	try {
 		const DB_NAME = process.env.MONGO_DB_NAME;
-		const connectionString = generateConnectionString();
+		const connectionString = await generateConnectionString();
 		const client = new MongoClient(connectionString);
 		await client.connect();
 		return client.db(DB_NAME);

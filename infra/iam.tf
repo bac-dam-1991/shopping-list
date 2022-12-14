@@ -12,7 +12,8 @@ resource "aws_iam_policy" "lambda_logging" {
   path        = "/"
   description = "IAM logging policy for ${var.lambda_function_name}"
   policy = templatefile("./src/lambda-policy.json", {
-    "LOG_GROUP" : "${aws_cloudwatch_log_group.lambda_log_group.arn}:*"
+    "LOG_GROUP"  = "${aws_cloudwatch_log_group.lambda_log_group.arn}:*",
+    "SECRET_ARN" = "${aws_secretsmanager_secret.mongo_password.arn}"
   })
 }
 

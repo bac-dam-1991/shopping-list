@@ -2,8 +2,15 @@
 	"Version": "2012-10-17",
 	"Statement": [
 		{
+			"Sid": "CloudWatchPolicyForLambda",
 			"Action": ["logs:CreateLogStream", "logs:PutLogEvents"],
 			"Resource": "${LOG_GROUP}",
+			"Effect": "Allow"
+		},
+		{
+			"Sid": "SecretManagerPolicyForLambda",
+			"Action": ["secretsmanager:GetSecretValue"],
+			"Resource": "${SECRET_ARN}",
 			"Effect": "Allow"
 		}
 	]

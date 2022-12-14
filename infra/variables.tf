@@ -2,6 +2,10 @@ variable "lambda_function_name" {
   default = "shopping-list-app-server-tf"
 }
 
+variable "default_region" {
+  default = "ap-southeast-2"
+}
+
 variable "s3_bucket_name" {
   default = "shopping-list-app-bucket"
 }
@@ -13,6 +17,11 @@ variable "default_tags" {
   }
 }
 
+variable "auth0_domain" {
+  type    = string
+  default = "shopping-list-app-prod.au.auth0.com"
+}
+
 variable "auth0_jwks_uri" {
   type    = string
   default = "https://shopping-list-app-prod.au.auth0.com/.well-known/jwks.json"
@@ -21,6 +30,11 @@ variable "auth0_jwks_uri" {
 variable "auth0_audience" {
   type    = string
   default = "http://shopping-list-app.com"
+}
+
+variable "auth0_client_id" {
+  type    = string
+  default = "bGr19fELvQhAXTCV1JTqTbsCA7j3nYKU"
 }
 
 variable "auth0_issuer" {
@@ -51,4 +65,9 @@ variable "mongo_scheme" {
 variable "mongo_query" {
   type    = string
   default = "retryWrites=true&w=majority"
+}
+
+variable "domain" {
+  type    = string
+  default = "shopping-list-app.bacdam.dev"
 }

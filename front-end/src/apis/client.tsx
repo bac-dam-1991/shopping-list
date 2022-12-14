@@ -8,7 +8,7 @@ export const useHttpClient = () => {
 	const getClient = useCallback(async () => {
 		const token = await getAccessTokenSilently();
 		return axios.create({
-			baseURL: process.env.REACT_APP_SERVER,
+			baseURL: window.__appConfig__.apiEndpoint,
 			headers: {
 				Authorization: `Bearer ${token}`,
 			},

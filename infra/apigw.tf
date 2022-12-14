@@ -2,6 +2,13 @@ resource "aws_apigatewayv2_api" "lambda_api" {
   name          = "${var.lambda_function_name}_apigw"
   protocol_type = "HTTP"
 
+  cors_configuration {
+    allow_credentials = true
+    allow_methods     = ["GET", "HEAD", "OPTIONS", "POST", "PUT", "DELETE"]
+    allow_origins     = ["https://${var.domain}"]
+    allow_headers     = ["*"]
+  }
+
   tags = merge(var.default_tags, {
     "Service" = "APIGW"
   })
@@ -9,7 +16,7 @@ resource "aws_apigatewayv2_api" "lambda_api" {
 
 resource "aws_apigatewayv2_stage" "lambda_gw" {
   api_id      = aws_apigatewayv2_api.lambda_api.id
-  name        = "${var.lambda_function_name}_stage"
+  name        = "$default"
   auto_deploy = true
   access_log_settings {
     destination_arn = aws_cloudwatch_log_group.apigw_log_group.arn

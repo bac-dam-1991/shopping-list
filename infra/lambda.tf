@@ -8,15 +8,16 @@ resource "aws_lambda_function" "server" {
 
   environment {
     variables = {
-      AUTH0_JWKS_URI = var.auth0_jwks_uri
-      AUTH0_AUDIENCE = var.auth0_audience
-      AUTH0_ISSUER   = var.auth0_issuer
-      MONGO_DB_NAME  = var.mongo_db_name
-      MONGO_HOST     = var.mongo_host
-      MONGO_USERNAME = var.mongo_username
-      MONGO_PASSWORD = ""
-      MONGO_SCHEME   = var.mongo_scheme
-      MONGO_QUERY    = var.mongo_query
+      AUTH0_JWKS_URI        = var.auth0_jwks_uri
+      AUTH0_AUDIENCE        = var.auth0_audience
+      AUTH0_ISSUER          = var.auth0_issuer
+      MONGO_DB_NAME         = var.mongo_db_name
+      MONGO_HOST            = var.mongo_host
+      MONGO_USERNAME        = var.mongo_username
+      SECRET_MONGO_PASSWORD = "${aws_secretsmanager_secret.mongo_password.name}"
+      MONGO_SCHEME          = var.mongo_scheme
+      MONGO_QUERY           = var.mongo_query
+      DEFAULT_REGION        = var.default_region
     }
   }
 
