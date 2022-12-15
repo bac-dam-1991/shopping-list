@@ -10,9 +10,11 @@ import {
 import { ShoppingItemCard } from '../components/ShoppingItemCard';
 import { ShoppingList, WithId } from '@common/types';
 import { withAuthenticationRequired } from '@auth0/auth0-react';
+import { Modal } from '../components/Modal';
 
 const BaseShoppingListView = () => {
 	const { id } = useParams();
+	const [modalVisible, setModalVisible] = useState<boolean>(false);
 
 	const [shoppingList, setShoppingList] = useState<WithId<ShoppingList> | null>(
 		null
@@ -31,6 +33,14 @@ const BaseShoppingListView = () => {
 		getShoppingListById();
 	}, [getShoppingListById]);
 
+	const openModal = () => {
+		setModalVisible(true);
+	};
+
+	const closeModal = () => {
+		setModalVisible(false);
+	};
+
 	return (
 		<Container maxWidth="sm">
 			{shoppingList ? (
@@ -45,21 +55,6 @@ const BaseShoppingListView = () => {
 				<Loader />
 			)}
 			<Stack spacing={2}>
-				{id && (
-					<Stack spacing={2}>
-						<NewShoppingItemForm
-							refetch={getShoppingListById}
-							shoppingListId={id}
-						/>
-						<Button
-							variant="contained"
-							type="submit"
-							form={NewShoppingItemFormId}
-						>
-							Add
-						</Button>
-					</Stack>
-				)}
 				{shoppingList &&
 					shoppingList.items.map((item) => {
 						return (
@@ -71,7 +66,39 @@ const BaseShoppingListView = () => {
 							/>
 						);
 					})}
+				<Button variant="outlined" onClick={openModal}>
+					Add item
+				</Button>
 			</Stack>
+			<Modal
+				open={modalVisible}
+				onClose={closeModal}
+				title="Add new item"
+				action={
+					<>
+						<Button variant="outlined" onClick={closeModal} fullWidth>
+							Cancel
+						</Button>
+						<Button
+							variant="contained"
+							type="submit"
+							form={NewShoppingItemFormId}
+							fullWidth
+						>
+							Add
+						</Button>
+					</>
+				}
+			>
+				<NewShoppingItemForm
+					refetch={async () => {
+						await getShoppingListById();
+						closeModal();
+					}}
+					shoppingListId={id!}
+					formId={NewShoppingItemFormId}
+				/>
+			</Modal>
 		</Container>
 	);
 };

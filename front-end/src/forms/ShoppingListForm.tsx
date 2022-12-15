@@ -43,6 +43,7 @@ export const ShoppingListForm = ({
 		<form onSubmit={handleSubmit(onSubmit)} id={formId}>
 			<Stack spacing={2}>
 				<TextField
+					size="small"
 					label="Name"
 					{...register('name')}
 					helperText={errors.name?.message}
